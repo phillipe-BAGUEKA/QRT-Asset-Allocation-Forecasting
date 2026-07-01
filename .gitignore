@@ -1,9 +1,34 @@
+# Virtual environment
 .venv/
+
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# Jupyter
 .ipynb_checkpoints/
+
+# VS Code
 .vscode/
+
+# macOS / Windows
 .DS_Store
 Thumbs.db
+
 # Raw challenge data
 data/raw/*.csv
+
+# Environment variables
+.env
+
+# Python packaging
+*.egg-info/
+
+# Cache
+.pytest_cache/
+.mypy_cache/
+
+# Notebook exports
+*.html

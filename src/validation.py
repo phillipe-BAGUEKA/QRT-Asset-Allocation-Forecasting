@@ -40,7 +40,7 @@ def create_expanding_window_folds(dates:list[str],size:int=120,k:int=4) -> list:
         fold_k["valid_start"] = valid_start
         fold_k["valid_end"] = valid_end
         valid_end = dates[dict_enum[valid_end] - size]
-        folds.append(fold_k)
+        folds.append(fold_k)   
 
     return folds[::-1]
 
