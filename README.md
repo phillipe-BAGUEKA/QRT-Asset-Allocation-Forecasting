@@ -66,8 +66,6 @@ A complete validation protocol was implemented using:
 Several reference strategies were implemented and evaluated:
 
 - Majority class baseline;
-- Always predict class 0;
-- Always predict class 1;
 - Momentum baseline;
 - Aggregated Momentum baseline;
 - Reversal baseline;
