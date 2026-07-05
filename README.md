@@ -44,7 +44,7 @@ Docker Deployment
 
 # Current Project Status
 
-## ✅ Completed
+## Completed
 
 ### 01 — Data Understanding
 
