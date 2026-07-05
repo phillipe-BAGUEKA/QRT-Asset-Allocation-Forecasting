@@ -237,7 +237,3 @@ The objective is not only to maximize predictive performance, but also to unders
 # Author
 
 **Phillipe BAGUEKA**
-
-Engineering Student in Data Science
-
-Machine Learning • Quantitative Research • Financial Data Science
