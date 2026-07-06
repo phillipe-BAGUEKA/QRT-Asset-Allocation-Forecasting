@@ -1,4 +1,6 @@
-# QRT Asset Allocation Performance Forecasting ## Overview
+# QRT Asset Allocation Performance Forecasting
+
+## Overview
 
 This repository contains my solution to the **QRT Asset Allocation Performance Forecasting Challenge**.
 
