@@ -315,3 +315,104 @@ def evaluate_model_on_folds(
         })
 
     return pd.DataFrame(results)
+
+
+def compare_model_results(
+    results_a: pd.DataFrame,
+    results_b: pd.DataFrame,
+    model_a_name: str = "model_a",
+    model_b_name: str = "model_b",
+) -> pd.DataFrame:
+    """
+    Compare the performance of two evaluated models across temporal folds.
+
+    The function compares two evaluation DataFrames produced by
+    ``evaluate_model_on_folds``. It keeps the main metrics for each model
+    and computes fold-level differences.
+
+    Delta metrics are computed as:
+
+        delta = model_b - model_a
+
+    Therefore:
+
+    - positive ``delta_accuracy`` indicates an improvement;
+    - positive ``delta_roc_auc`` indicates an improvement;
+    - negative ``delta_log_loss`` indicates an improvement.
+
+    Args:
+        results_a:
+            Evaluation DataFrame of the reference model.
+
+        results_b:
+            Evaluation DataFrame of the model being compared.
+
+        model_a_name:
+            Name used to identify the reference model in the output columns.
+
+        model_b_name:
+            Name used to identify the compared model in the output columns.
+
+    Returns:
+        pd.DataFrame:
+            Fold-level comparison table containing both model metrics
+            and their differences.
+
+    Raises:
+        ValueError:
+            If required evaluation columns are missing.
+    """
+
+    required_columns = {"fold", "accuracy", "log_loss", "roc_auc"}
+
+    missing_a = required_columns - set(results_a.columns)
+    missing_b = required_columns - set(results_b.columns)
+
+    if missing_a:
+        raise ValueError(f"Missing columns in results_a: {sorted(missing_a)}")
+
+    if missing_b:
+        raise ValueError(f"Missing columns in results_b: {sorted(missing_b)}")
+
+    results_a_renamed = results_a[
+        ["fold", "accuracy", "log_loss", "roc_auc"]
+    ].rename(
+        columns={
+            "accuracy": f"accuracy_{model_a_name}",
+            "log_loss": f"log_loss_{model_a_name}",
+            "roc_auc": f"roc_auc_{model_a_name}",
+        }
+    )
+
+    results_b_renamed = results_b[
+        ["fold", "accuracy", "log_loss", "roc_auc"]
+    ].rename(
+        columns={
+            "accuracy": f"accuracy_{model_b_name}",
+            "log_loss": f"log_loss_{model_b_name}",
+            "roc_auc": f"roc_auc_{model_b_name}",
+        }
+    )
+
+    comparison = results_a_renamed.merge(
+        results_b_renamed,
+        on="fold",
+        how="inner",
+    )
+
+    comparison["delta_accuracy"] = (
+        comparison[f"accuracy_{model_b_name}"]
+        - comparison[f"accuracy_{model_a_name}"]
+    )
+
+    comparison["delta_log_loss"] = (
+        comparison[f"log_loss_{model_b_name}"]
+        - comparison[f"log_loss_{model_a_name}"]
+    )
+
+    comparison["delta_roc_auc"] = (
+        comparison[f"roc_auc_{model_b_name}"]
+        - comparison[f"roc_auc_{model_a_name}"]
+    )
+
+    return comparison

@@ -20,6 +20,9 @@ Thumbs.db
 # Raw challenge data
 data/raw/*.csv
 
+# Generated submissions
+data/submissions/*.csv
+
 # Environment variables
 .env
 
