@@ -1,201 +1,48 @@
 # QRT Asset Allocation Performance Forecasting
 
-## Overview
+> **Machine Learning for Financial Asset Allocation using Temporal Validation and Advanced Boosting Models**
 
-This repository contains my solution to the **QRT Asset Allocation Performance Forecasting Challenge**.
-
-The objective of this project is not only to build a predictive model, but to conduct a **reproducible quantitative research workflow** for asset allocation forecasting.
-
-Rather than comparing machine learning models in isolation, each stage of the project is driven by a scientific hypothesis, evaluated through a strict temporal validation protocol and documented before moving to the next step.
-
-The repository is developed incrementally following professional software engineering practices, including modular code organization, reusable components, experiment reproducibility and version control.
+![Python](https://img.shields.io/badge/Python-3.13-blue)
+![Machine Learning](https://img.shields.io/badge/Machine-Learning-orange)
+![Finance](https://img.shields.io/badge/Domain-Quantitative%20Finance-darkgreen)
+![Status](https://img.shields.io/badge/Status-In%20Progress-success)
+![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
 ---
 
-## Research Workflow
+## Project Overview
 
-```text
-Data Understanding
-        ↓
-Exploratory Data Analysis
-        ↓
-Temporal Validation Strategy
-        ↓
-Deterministic Baselines
-        ↓
-Logistic Regression (Raw Returns)
-        ↓
-Feature Engineering
-        ↓
-Official Submission Pipeline
-        ↓
-Regularized Logistic Regression
-        ↓
-Tree-Based Models
-        ↓
-Hyperparameter Optimization
-        ↓
-Model Interpretation
-        ↓
-Streamlit + FastAPI
-        ↓
-Docker Deployment
-```
+This repository contains my complete solution to the **QRT Asset Allocation Performance Forecasting Challenge**.
+
+The objective of the challenge is to predict whether a daily asset allocation will generate a **positive future return**, using only historical market information.
+
+Unlike many traditional Machine Learning projects, this challenge requires respecting the temporal structure of financial data. Every experiment therefore follows a strict chronological validation protocol to avoid look-ahead bias and data leakage.
+
+The project progressively investigates increasingly sophisticated Machine Learning models while maintaining a rigorous scientific methodology.
 
 ---
 
-## Current Project Status
+## Objectives
 
-### Completed
+The project aims to answer several research questions:
 
-#### 01 — Data Understanding
-
-- Dataset inspection
-- Target understanding
-- Feature identification
-- Dataset structure analysis
-
-#### 02 — Exploratory Data Analysis
-
-- Target distribution analysis
-- Temporal analysis
-- Allocation-level analysis
-- Group-level analysis
-- Preliminary signal investigation
-
-#### 03 — Temporal Validation Strategy
-
-A robust chronological validation protocol has been implemented using an **expanding-window** strategy.
-
-Main characteristics:
-
-- strict chronological split;
-- expanding training window;
-- fixed validation horizon;
-- leakage prevention;
-- reusable validation utilities.
-
-#### 04 — Deterministic Baselines
-
-Several reference strategies have been implemented to establish meaningful performance baselines:
-
-- Majority Class
-- Always Positive
-- Always Negative
-- Momentum
-- Reversal
-- Aggregated Momentum
-- Aggregated Reversal
-
-All strategies are evaluated using the same temporal validation framework.
-
-#### 05 — Logistic Regression on Raw Returns
-
-Implementation of the first supervised learning model.
-
-Pipeline:
-
-```text
-SimpleImputer
-        ↓
-StandardScaler
-        ↓
-LogisticRegression
-```
-
-The evaluation framework computes:
-
-- Accuracy
-- ROC-AUC
-- Log-Loss
-
-using the same temporal validation protocol adopted for all previous experiments.
-
-#### 06 — Feature Engineering
-
-A first complete feature engineering phase has been conducted using the logistic regression pipeline as a fixed measurement instrument.
-
-The objective was to isolate the effect of the engineered features from the effect of model complexity.
-
-Feature families tested:
-
-- multi-horizon momentum;
-- realized volatility;
-- momentum / volatility ratio;
-- signed volume.
-
-Each feature family was introduced through an economic hypothesis, evaluated independently and compared against the logistic regression model trained on raw historical returns.
-
-Main conclusion:
-
-None of the tested feature families provided a robust improvement over the raw return representation under the current linear model.
-
-This result does not imply that momentum, volatility or volume are irrelevant. It only indicates that the current representations did not add exploitable information for a logistic regression model beyond what was already contained in `RET_1` to `RET_20`.
-
-#### 07 — First Official Submission Pipeline
-
-A reproducible submission pipeline has been created.
-
-The pipeline:
-
-- loads the train and test datasets;
-- creates the binary classification target;
-- trains the selected final model on the full training set;
-- predicts on the official test set;
-- validates the expected submission format;
-- exports the submission file.
-
-The first official submission was generated using:
-
-```text
-Model: Logistic Regression
-Features: RET_1 ... RET_20
-```
-
-Public leaderboard score:
-
-```text
-0.5019
-```
-
-This score is treated as a first external validation of the end-to-end pipeline, not as a feature selection criterion.
+- Can historical returns predict future allocation performance?
+- How much information is contained in engineered financial features?
+- Do nonlinear models outperform linear models?
+- Can modern boosting algorithms improve classical Gradient Boosting?
+- How should temporal validation be performed in quantitative finance?
 
 ---
 
-## Main Scientific Findings
+# Project Structure
 
-The first logistic regression model using the twenty raw historical returns (`RET_1` ... `RET_20`) produced performance close to the deterministic momentum baseline.
-
-The first feature engineering phase tested several economically motivated representations:
-
-- momentum as a persistence signal;
-- volatility as a proxy for local noise;
-- momentum adjusted by volatility;
-- signed volume as a contextual market activity signal.
-
-However, none of these representations produced a stable improvement across temporal folds.
-
-The current interpretation is that simple linear transformations of returns and signed volume are not sufficient to extract a stronger signal with a logistic regression model.
-
-The next research question is therefore:
-
-> Can non-linear models exploit interactions or threshold effects that the current linear model cannot capture?
-
----
-
-## Project Structure
-
-```text
-.
+```
+QRT_Asset_Allocation/
+│
 ├── data/
 │   ├── raw/
-│   │   ├── X_train.csv
-│   │   ├── y_train.csv
-│   │   ├── X_test.csv
-│   │   └── sample_submission.csv
-│   │
+│   ├── processed/
 │   └── submissions/
-│       └── submission_v001.csv
 │
 ├── notebooks/
 │   ├── 01_data_understanding.ipynb
@@ -204,110 +51,329 @@ The next research question is therefore:
 │   ├── 04_baselines.ipynb
 │   ├── 05_logistic_regression.ipynb
 │   ├── 06_feature_engineering.ipynb
-│   └── benchmark_submission.ipynb
+│   ├── 07_tree_models.ipynb
+│   ├── 08_boosting_models.ipynb
+│   └── 09_advanced_boosting_models.ipynb
 │
 ├── src/
-│   ├── baselines.py
-│   ├── data_loading.py
-│   ├── evaluation.py
-│   ├── features.py
-│   ├── modeling.py
-│   ├── submission.py
-│   ├── target.py
-│   └── validation.py
 │
-├── submissions_log.md
 ├── README.md
 ├── requirements.txt
-└── .gitignore
+└── submissions_log.md
 ```
 
-Note: raw data files and generated submission files are ignored by Git.
+---
+
+# Scientific Methodology
+
+The project follows a strict experimental workflow.
+
+Every modelling stage follows exactly the same protocol.
+
+```
+Data Understanding
+        ↓
+Exploratory Data Analysis
+        ↓
+Temporal Validation Strategy
+        ↓
+Baselines
+        ↓
+Linear Models
+        ↓
+Feature Engineering
+        ↓
+Tree Models
+        ↓
+Boosting Models
+        ↓
+Advanced Boosting
+        ↓
+Model Comparison
+        ↓
+Official Submission
+```
+
+The public leaderboard is **never used to choose a model**.
+
+Model selection relies exclusively on local temporal validation.
+
+The leaderboard is only used as an external validation signal.
 
 ---
 
-## Software Architecture
+# Temporal Validation
 
-The project follows a modular architecture where notebooks only orchestrate experiments.
+Financial observations are ordered in time.
 
-Reusable logic is centralized inside the `src/` package.
+Random train/test splits would introduce severe look-ahead bias.
 
-| Module | Responsibility |
-|---|---|
-| `data_loading.py` | Dataset loading utilities |
-| `validation.py` | Temporal validation strategy |
-| `baselines.py` | Deterministic benchmark strategies |
-| `modeling.py` | Machine Learning pipeline construction |
-| `evaluation.py` | Baseline and model evaluation |
-| `features.py` | Feature engineering utilities |
-| `target.py` | Binary target creation |
-| `submission.py` | Final training and submission generation |
+The project therefore uses an **Expanding Window Validation** strategy.
 
-This separation improves:
+For every fold:
 
-- maintainability;
-- reproducibility;
-- code reuse;
-- experiment consistency.
+- the training period always precedes the validation period;
+- validation windows contain 120 trading dates;
+- the training window expands after each fold;
+- no future information is used.
 
 ---
 
-## Methodology
+# Models Evaluated
 
-Each major research stage follows the same workflow:
+## Baselines
 
-1. formulate a scientific hypothesis;
-2. implement the experiment;
-3. evaluate using temporal validation;
-4. compare against relevant baselines;
-5. interpret the results;
-6. decide whether to keep, reject or reformulate the idea;
-7. refactor reusable logic into `src/`;
-8. document the conclusions;
-9. commit and publish the milestone.
-
-The objective is not only to maximize predictive performance, but also to understand **why** a model succeeds or fails.
+- Majority Class
+- Always Positive
+- Always Negative
+- Momentum
+- Mean Momentum
+- Mean Reversion
 
 ---
 
-## Leaderboard Policy
+## Linear Models
 
-The public leaderboard is not used as the primary model selection tool.
-
-Model and feature decisions are made primarily through local temporal validation.
-
-Official submissions are used only as external checks to verify whether local conclusions are broadly consistent with out-of-sample leaderboard behavior.
-
-This is intended to reduce the risk of leaderboard overfitting.
+- Logistic Regression
 
 ---
 
-## Technologies
+## Tree-Based Models
+
+- Decision Tree
+- Random Forest
+
+---
+
+## Classical Boosting
+
+- AdaBoost
+- Gradient Boosting
+
+---
+
+## Advanced Boosting
+
+- XGBoost
+- LightGBM
+- CatBoost
+
+---
+
+# Feature Engineering
+
+Several financial feature families were investigated.
+
+### Historical Returns
+
+```
+RET_1 ... RET_20
+```
+
+### Momentum
+
+- momentum_3
+- momentum_5
+- momentum_10
+- momentum_20
+
+---
+
+### Volatility
+
+- volatility_3
+- volatility_20
+
+---
+
+### Volume Features
+
+- volume_3
+- volume_20
+- delta_volume
+
+---
+
+### Risk Adjusted Features
+
+- momentum_volatility_ratio
+
+---
+
+### Signed Volumes
+
+Historical signed trading volumes.
+
+---
+
+# Evaluation Metrics
+
+Each model is evaluated using:
+
+- Accuracy
+- ROC-AUC
+- Log-Loss
+
+The same metrics are computed on every temporal fold.
+
+---
+
+# Main Results
+
+Several important observations emerged during the project.
+
+### Logistic Regression
+
+Provides a strong linear baseline.
+
+---
+
+### Random Forest
+
+Captures nonlinear interactions but provides only moderate improvements.
+
+---
+
+### Gradient Boosting
+
+Produces the best overall performance.
+
+This suggests that nonlinear additive models better capture the weak financial signal.
+
+---
+
+### XGBoost
+
+Despite its sophisticated optimization strategy, XGBoost did not consistently outperform the classical Gradient Boosting model under the current feature representation.
+
+---
+
+### LightGBM
+
+LightGBM produced results extremely close to XGBoost.
+
+No significant advantage was observed.
+
+---
+
+### CatBoost
+
+Pipeline implemented.
+
+Further experiments may investigate native categorical features.
+
+---
+
+# Best Public Leaderboard Score
+
+Current best public score:
+
+```
+0.50957
+```
+
+Obtained with:
+
+- Gradient Boosting
+- Historical Returns (RET_1 ... RET_20)
+
+---
+
+# Technologies
 
 - Python
-- Pandas
 - NumPy
-- Scikit-Learn
+- Pandas
 - Matplotlib
+- Scikit-Learn
+- XGBoost
+- LightGBM
+- CatBoost
 - Jupyter Notebook
 
 ---
 
-## Next Research Steps
+# Installation
 
-- Regularized Logistic Regression
-- Random Forest
-- Gradient Boosting
-- XGBoost / LightGBM
-- Hyperparameter Optimization
-- Model Interpretation
-- Model Persistence
-- FastAPI
-- Streamlit Dashboard
-- Docker Deployment
+Clone the repository
+
+```bash
+git clone https://github.com/phillipe-BAGUEKA/QRT-Asset-Allocation-Forecasting.git
+```
+
+Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
 
 ---
 
-## Author
+# Running the Project
+
+Launch the notebooks sequentially.
+
+The recommended execution order is:
+
+```
+01
+↓
+
+02
+↓
+
+03
+↓
+
+04
+↓
+
+05
+↓
+
+06
+↓
+
+07
+↓
+
+08
+↓
+
+09
+```
+
+Each notebook is independent and documents its conclusions before moving to the next stage.
+
+---
+
+# Future Work
+
+Several research directions remain open.
+
+- Better understanding of the official challenge metric.
+- Probability calibration.
+- Model ensembles.
+- Stacking.
+- Ranking-based learning objectives.
+- SHAP value interpretation.
+- Hyperparameter optimization.
+- Streamlit application.
+- FastAPI deployment.
+- Docker containerization.
+
+---
+
+# Repository Philosophy
+
+This repository focuses on understanding **why** a model works rather than simply obtaining a higher leaderboard score.
+
+Every modelling decision is documented, interpreted and compared under identical temporal validation conditions.
+
+The goal is to build reproducible and scientifically justified Machine Learning experiments for quantitative finance.
+
+---
+
+# Author
 
 **Phillipe BAGUEKA**

@@ -2,6 +2,8 @@ numpy
 pandas
 matplotlib
 scikit-learn
+xgboost
+lightgbm
+catboost
 jupyter
-notebook
 ipykernel
