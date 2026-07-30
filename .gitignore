@@ -35,3 +35,18 @@ data/submissions/*.csv
 
 # Notebook exports
 *.html
+
+# Generated submissions and diagnostics
+data/submissions/*.csv
+data/submissions/*.json
+data/submissions/*probabilities*
+
+# Model artifacts
+models/
+*.pkl
+*.joblib
+*.pt
+*.pth
+
+# CatBoost local files
+catboost_info/

@@ -7,7 +7,11 @@ project conventions as the other model modules: constant-value imputation,
 reproducible random seeds and Scikit-Learn compatible pipelines.
 """
 
-from typing import Union
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import FunctionTransformer
+
+from typing import Sequence, Union
 
 from catboost import CatBoostClassifier
 from lightgbm import LGBMClassifier
@@ -18,6 +22,81 @@ from xgboost import XGBClassifier
 
 RANDOM_STATE = 42
 VerbosityType = Union[bool, int]
+
+
+def _prepare_catboost_dataframe(
+    X: pd.DataFrame,
+    categorical_features: tuple[str, ...],
+) -> pd.DataFrame:
+    """
+    Prepare a pandas DataFrame for native CatBoost categorical processing.
+
+    Numerical infinite values are converted to missing values. Categorical
+    variables are converted to strings and missing categories are replaced
+    by an explicit category.
+
+    Parameters
+    ----------
+    X : pd.DataFrame
+        Input feature matrix.
+
+    categorical_features : tuple[str, ...]
+        Names of categorical columns handled natively by CatBoost.
+
+    Returns
+    -------
+    pd.DataFrame
+        Prepared copy of the input DataFrame.
+
+    Raises
+    ------
+    TypeError
+        If X is not a pandas DataFrame.
+
+    ValueError
+        If a requested categorical feature is missing.
+    """
+    if not isinstance(X, pd.DataFrame):
+        raise TypeError(
+            "Native CatBoost categorical processing requires "
+            "a pandas DataFrame."
+        )
+
+    missing_features = [
+        feature
+        for feature in categorical_features
+        if feature not in X.columns
+    ]
+
+    if missing_features:
+        raise ValueError(
+            f"Missing categorical features: {missing_features}."
+        )
+
+    X_prepared = X.copy()
+
+    numerical_features = [
+        column
+        for column in X_prepared.columns
+        if column not in categorical_features
+    ]
+
+    if numerical_features:
+        X_prepared[numerical_features] = (
+            X_prepared[numerical_features]
+            .replace([np.inf, -np.inf], np.nan)
+        )
+
+    for feature in categorical_features:
+        X_prepared[feature] = (
+            X_prepared[feature]
+            .astype("string")
+            .fillna("__MISSING__")
+            .astype(str)
+        )
+
+    return X_prepared
+
 
 
 def build_xgboost_pipeline(
@@ -234,76 +313,110 @@ def build_lightgbm_pipeline(
     )
 
 
-def build_catboost_pipeline(
-    iterations: int = 100,
-    learning_rate: float = 0.1,
-    depth: int = 6,
-    l2_leaf_reg: float = 3.0,
+def build_catboost_categorical_pipeline(
+    categorical_features: Sequence[str] = (
+        "GROUP",
+        "ALLOCATION",
+    ),
+    iterations: int = 300,
+    learning_rate: float = 0.03,
+    depth: int = 5,
+    l2_leaf_reg: float = 8.0,
+    random_strength: float = 1.0,
     random_seed: int = RANDOM_STATE,
     verbose: VerbosityType = False,
     thread_count: int = -1,
 ) -> Pipeline:
     """
-    Build a CatBoost classification pipeline.
-
-    CatBoost relies on ordered boosting and symmetric trees. It is
-    especially relevant when categorical features are handled natively,
-    although this project version currently receives numerical features.
+    Build a CatBoost pipeline with native categorical feature handling.
 
     Parameters
     ----------
-    iterations : int, default=100
+    categorical_features : sequence of str
+        Columns treated natively as categorical variables.
+
+    iterations : int, default=300
         Number of boosting iterations.
-    learning_rate : float, default=0.1
-        Contribution assigned to each tree.
-    depth : int, default=6
-        Depth of the symmetric trees.
-    l2_leaf_reg : float, default=3.0
-        L2 regularization coefficient applied to leaf values.
+
+    learning_rate : float, default=0.03
+        Contribution of each new tree.
+
+    depth : int, default=5
+        Depth of CatBoost symmetric trees.
+
+    l2_leaf_reg : float, default=8.0
+        L2 regularization applied to leaf values.
+
+    random_strength : float, default=1.0
+        Randomness applied during split selection.
+
     random_seed : int, default=42
         Random seed used for reproducibility.
+
     verbose : bool or int, default=False
-        Logging configuration.
+        CatBoost logging configuration.
+
     thread_count : int, default=-1
-        Number of processor threads used during training.
+        Number of CPU threads used during training.
 
     Returns
     -------
     Pipeline
-        Untrained pipeline composed of ``SimpleImputer`` and
-        ``CatBoostClassifier``.
-
-    Raises
-    ------
-    ValueError
-        If one of the main hyperparameters is outside its valid range.
+        Scikit-Learn compatible CatBoost pipeline.
     """
+    categorical_features = tuple(categorical_features)
+
+    if not categorical_features:
+        raise ValueError(
+            "categorical_features must contain at least one feature."
+        )
+
+    if len(categorical_features) != len(set(categorical_features)):
+        raise ValueError(
+            "categorical_features contains duplicated feature names."
+        )
+
     if iterations <= 0:
         raise ValueError("iterations must be strictly positive.")
+
     if learning_rate <= 0:
         raise ValueError("learning_rate must be strictly positive.")
+
     if depth <= 0:
         raise ValueError("depth must be strictly positive.")
+
     if l2_leaf_reg < 0:
         raise ValueError("l2_leaf_reg must be non-negative.")
+
+    if random_strength < 0:
+        raise ValueError("random_strength must be non-negative.")
+
+    feature_preparation = FunctionTransformer(
+        func=_prepare_catboost_dataframe,
+        validate=False,
+        kw_args={
+            "categorical_features": categorical_features,
+        },
+    )
 
     classifier = CatBoostClassifier(
         iterations=iterations,
         learning_rate=learning_rate,
         depth=depth,
         l2_leaf_reg=l2_leaf_reg,
+        random_strength=random_strength,
+        cat_features=list(categorical_features),
+        loss_function="Logloss",
+        eval_metric="AUC",
         random_seed=random_seed,
         verbose=verbose,
         thread_count=thread_count,
-        loss_function="Logloss",
+        allow_writing_files=False,
     )
 
     return Pipeline(
         steps=[
-            (
-                "imputer",
-                SimpleImputer(strategy="constant", fill_value=0.0),
-            ),
+            ("feature_preparation", feature_preparation),
             ("classifier", classifier),
         ]
     )
