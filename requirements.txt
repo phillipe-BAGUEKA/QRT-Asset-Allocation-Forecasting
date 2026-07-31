@@ -10,3 +10,4 @@ lightgbm
 catboost
 torch
 pytest
+optuna==4.9.0
