@@ -12,6 +12,7 @@ All learned models are cloned before each fold so that fitted parameters
 and preprocessing statistics are never shared between temporal windows.
 """
 
+import time
 from typing import Any, Callable
 
 import numpy as np
@@ -564,7 +565,9 @@ def evaluate_model_on_folds(
 
     The model is cloned before every fold to prevent fitted parameters
     and preprocessing statistics from being shared across validation
-    windows.
+    windows. Training and validation prediction times each measure the
+    cumulative duration of the corresponding ``predict`` and
+    ``predict_proba`` calls.
     """
     _validate_folds(folds)
     _validate_feature_columns(feature_cols)
@@ -580,7 +583,7 @@ def evaluate_model_on_folds(
 
     results = []
 
-    for fold_index, fold in enumerate(folds, start=1):
+    for fold in folds:
         fold_model = clone(model)
         fold_train, fold_valid = _get_temporal_split(df, fold)
 
@@ -607,11 +610,34 @@ def evaluate_model_on_folds(
         validation_length_before = len(fold_valid)
         validation_id_before = fold_valid["ROW_ID"].copy()
 
+        fit_start = time.perf_counter()
         fold_model.fit(X_train, y_train)
+        fit_time_seconds = time.perf_counter() - fit_start
 
+        train_prediction_start = time.perf_counter()
+        train_predictions = fold_model.predict(X_train)
+        train_prediction_time_seconds = (
+            time.perf_counter() - train_prediction_start
+        )
+
+        train_probability_start = time.perf_counter()
+        train_probabilities = fold_model.predict_proba(X_train)[:, 1]
+        train_prediction_time_seconds += (
+            time.perf_counter() - train_probability_start
+        )
+
+        valid_prediction_start = time.perf_counter()
         fold_valid["prediction"] = fold_model.predict(X_valid)
+        valid_prediction_time_seconds = (
+            time.perf_counter() - valid_prediction_start
+        )
+
+        valid_probability_start = time.perf_counter()
         fold_valid["predicted_proba"] = (
             fold_model.predict_proba(X_valid)[:, 1]
+        )
+        valid_prediction_time_seconds += (
+            time.perf_counter() - valid_probability_start
         )
 
         _validate_prediction_dataframe(
@@ -621,23 +647,45 @@ def evaluate_model_on_folds(
             context=f"Model evaluation, fold {fold['fold']}",
         )
 
-        fold_accuracy = accuracy_score(
+        train_accuracy = accuracy_score(
+            y_train,
+            train_predictions,
+        )
+        valid_accuracy = accuracy_score(
             y_valid,
             fold_valid["prediction"],
         )
-        fold_log_loss = log_loss(
+        train_log_loss = log_loss(
+            y_train,
+            train_probabilities,
+            labels=[0, 1],
+        )
+        valid_log_loss = log_loss(
             y_valid,
             fold_valid["predicted_proba"],
             labels=[0, 1],
         )
 
+        train_roc_auc = roc_auc_score(
+            y_train,
+            train_probabilities,
+        )
+
         if y_valid.nunique() == 2:
-            fold_roc_auc = roc_auc_score(
+            valid_roc_auc = roc_auc_score(
                 y_valid,
                 fold_valid["predicted_proba"],
             )
         else:
-            fold_roc_auc = None
+            valid_roc_auc = None
+
+        accuracy_gap = train_accuracy - valid_accuracy
+        roc_auc_gap = (
+            train_roc_auc - valid_roc_auc
+            if valid_roc_auc is not None
+            else None
+        )
+        log_loss_gap = valid_log_loss - train_log_loss
 
         fold_n_correct_predictions = (
             y_valid.to_numpy()
@@ -646,18 +694,36 @@ def evaluate_model_on_folds(
 
         results.append(
             {
-                "fold": fold_index,
+                "fold": fold["fold"],
                 "train_start": fold["train_start"],
                 "train_end": fold["train_end"],
                 "valid_start": fold["valid_start"],
                 "valid_end": fold["valid_end"],
                 "train_positive_rate": fold_train_positive_rate,
                 "valid_positive_rate": fold_valid_positive_rate,
-                "accuracy": fold_accuracy,
-                "log_loss": fold_log_loss,
-                "roc_auc": fold_roc_auc,
+                "accuracy": valid_accuracy,
+                "log_loss": valid_log_loss,
+                "roc_auc": valid_roc_auc,
                 "n_valid_predictions": len(fold_valid),
                 "n_correct_predictions": fold_n_correct_predictions,
+                "n_train": len(fold_train),
+                "n_valid": len(fold_valid),
+                "train_accuracy": train_accuracy,
+                "valid_accuracy": valid_accuracy,
+                "train_roc_auc": train_roc_auc,
+                "valid_roc_auc": valid_roc_auc,
+                "train_log_loss": train_log_loss,
+                "valid_log_loss": valid_log_loss,
+                "accuracy_gap": accuracy_gap,
+                "roc_auc_gap": roc_auc_gap,
+                "log_loss_gap": log_loss_gap,
+                "fit_time_seconds": fit_time_seconds,
+                "train_prediction_time_seconds": (
+                    train_prediction_time_seconds
+                ),
+                "valid_prediction_time_seconds": (
+                    valid_prediction_time_seconds
+                ),
             }
         )
 
