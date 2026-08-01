@@ -50,3 +50,9 @@ models/
 
 # CatBoost local files
 catboost_info/
+
+# Local MLflow tracking
+/mlflow_data/
+/mlflow.db
+/mlruns/
+/mlartifacts/
