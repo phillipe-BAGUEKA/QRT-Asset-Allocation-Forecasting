@@ -12,3 +12,4 @@ torch
 pytest
 optuna==4.9.0
 mlflow==3.14.0
+joblib==1.5.3
