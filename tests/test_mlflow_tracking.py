@@ -596,6 +596,47 @@ def test_study_run_logs_session_counts_and_global_best_trial(
     }
 
 
+def test_enqueued_waiting_trial_is_counted_in_current_session(
+    tmp_path: Path,
+) -> None:
+    experiment_id, client, _, _ = _configure_test_tracking(tmp_path)
+    study = optuna.create_study(
+        direction="maximize",
+        sampler=optuna.samplers.RandomSampler(seed=42),
+        pruner=optuna.pruners.NopPruner(),
+    )
+    study.enqueue_trial({"learning_rate": 0.05})
+
+    assert len(study.trials) == 1
+    assert study.trials[0].state == TrialState.WAITING
+
+    returned_study, parent_run_id = run_optuna_study_with_mlflow(
+        study=study,
+        objective=_successful_objective,
+        experiment_id=experiment_id,
+        parent_run_name="study-with-enqueued-trial",
+        n_trials=1,
+    )
+
+    assert returned_study is study
+    assert len(study.trials) == 1
+    assert study.trials[0].state == TrialState.COMPLETE
+
+    parent = client.get_run(parent_run_id)
+    assert parent.data.metrics == {
+        "session_number_of_trials": pytest.approx(1.0),
+        "study_total_number_of_trials": pytest.approx(1.0),
+        "session_complete_trials": pytest.approx(1.0),
+        "session_failed_trials": pytest.approx(0.0),
+        "session_pruned_trials": pytest.approx(0.0),
+        "study_best_trial_number": pytest.approx(0.0),
+        "study_best_objective_value": pytest.approx(0.60),
+    }
+
+    children = _child_runs(client, experiment_id, parent_run_id)
+    assert len(children) == 1
+
+
 def test_study_parent_run_fails_when_optimize_raises(
     tmp_path: Path,
 ) -> None:

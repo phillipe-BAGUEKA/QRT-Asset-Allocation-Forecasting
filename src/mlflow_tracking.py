@@ -397,8 +397,8 @@ def run_optuna_study_with_mlflow(
     """Run one Optuna study session inside a parent MLflow run."""
     _validate_study_run_arguments(n_trials, timeout)
 
-    existing_trial_numbers = {
-        trial.number
+    trial_states_before = {
+        trial.number: trial.state
         for trial in study.trials
     }
 
@@ -457,10 +457,20 @@ def run_optuna_study_with_mlflow(
         )
 
         all_trials = list(study.trials)
+        # An enqueued trial already has a number before optimize. Count it in
+        # this session when optimize consumes it and changes its WAITING state.
+        # Trials that were historically terminal remain excluded.
         session_trials = [
             trial
             for trial in all_trials
-            if trial.number not in existing_trial_numbers
+            if (
+                trial.number not in trial_states_before
+                or (
+                    trial_states_before[trial.number]
+                    == TrialState.WAITING
+                    and trial.state != TrialState.WAITING
+                )
+            )
         ]
 
         session_complete_trials = [
