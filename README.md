@@ -2,11 +2,11 @@
 
 ![Python](https://img.shields.io/badge/Python-3.13-blue)
 ![Modeling status](https://img.shields.io/badge/Modeling_pipeline-complete-brightgreen)
-![Serving status](https://img.shields.io/badge/MLOps_serving-in_progress-orange)
+![Inference status](https://img.shields.io/badge/FastAPI_%2B_Streamlit-complete-brightgreen)
 
 A reproducible modeling pipeline for the QRT challenge **"Trust or Short? Predicting the Performance of Daily Asset Allocations"**.
 
-The modeling phase is complete: the repository covers leakage-safe validation, feature and model comparisons, train-validation diagnostics, Optuna and MLflow infrastructure, and serialization of a frozen reference model. The MLOps serving layer remains to be built. This is an educational and portfolio project, not trading advice.
+The modeling and local inference phases are complete: the repository covers leakage-safe validation, feature and model comparisons, train-validation diagnostics, Optuna and MLflow infrastructure, serialization of a frozen reference model, a FastAPI inference service, and a multipage Streamlit application. This is an educational and portfolio project, not financial or trading advice.
 
 ## Overview
 
@@ -53,7 +53,8 @@ Data understanding
   -> Optuna infrastructure
   -> MLflow tracking
   -> frozen final model
-  -> future MLOps serving layer
+  -> FastAPI inference service
+  -> Streamlit user interface
 ```
 
 The notebooks preserve the exploratory reasoning, while reusable implementation and validation logic lives in `src/`. Reproducible command-line entry points live in `scripts/`.
@@ -229,36 +230,25 @@ QRT-Asset-Allocation-Forecasting/
 |-- data/                         # Local raw data and generated submissions; ignored
 |-- mlflow_data/                  # Local SQLite tracking and artifacts; ignored
 |-- models/                       # Local serialized models and metadata; ignored
-|-- notebooks/
-|   |-- 01_data_understanding.ipynb
-|   |-- 02_eda.ipynb
-|   |-- 03_validation_strategy.ipynb
-|   |-- 04_baselines.ipynb
-|   |-- 05_logistic_regression.ipynb
-|   |-- 06_feature_engineering.ipynb
-|   |-- 07_tree_models.ipynb
-|   |-- 08_boosting_models.ipynb
-|   |-- 09_advanced_boosting_models.ipynb
-|   |-- 10_models_analysis.ipynb
-|   |-- 11_signal_exploitation_cross_sectional_features.ipynb
-|   `-- benchmark_submission.ipynb
+|-- app/                          # FastAPI inference service
+|   |-- config.py                 # Paths, feature schema, and API settings
+|   |-- main.py                   # Application lifecycle and HTTP endpoints
+|   |-- model_service.py          # Joblib loading, validation, and prediction
+|   `-- schemas.py                # Pydantic request and response schemas
+|-- frontend/                     # Multipage Streamlit application
+|   |-- api_client.py             # HTTP client for the FastAPI service
+|   |-- streamlit_app.py          # Navigation and frontend entry point
+|   `-- views/                    # Home, prediction, model, and API pages
+|-- docs/
+|   `-- run_api_and_streamlit.md  # Local two-process launch guide
+|-- images/
+|   `-- QRT-Brand-Master-Full-WO-HR.png  # QRT application logo
+|-- notebooks/                    # Exploratory and modeling workflow
 |-- scripts/
 |   |-- run_gradient_boosting_mlflow_smoke_test.py
 |   `-- train_final_gradient_boosting.py
-|-- src/
-|   |-- data_loading.py, target.py
-|   |-- features.py, cross_sectional_features.py
-|   |-- validation.py, evaluation.py
-|   |-- modeling.py, tree_models.py, boosting_models.py
-|   |-- advanced_boosting.py, neural_networks.py
-|   |-- optimization.py, mlflow_tracking.py
-|   `-- baselines.py, submission.py
-|-- tests/
-|   |-- test_cross_sectional_features.py
-|   |-- test_evaluation.py
-|   |-- test_optimization.py
-|   |-- test_mlflow_tracking.py
-|   `-- test_final_gradient_boosting_training.py
+|-- src/                           # Reusable modeling and tracking modules
+|-- tests/                         # Modeling, service, API, and client tests
 |-- pytest.ini
 |-- requirements.txt
 |-- submissions_log.md
@@ -294,7 +284,30 @@ Both command-line runners require execution from a clean Git worktree so their m
 
 ## Local inference application
 
-The project now includes a FastAPI inference service and a multipage Streamlit interface that consumes the API over HTTP. See [Running the QRT FastAPI and Streamlit Applications](docs/run_api_and_streamlit.md) for the two-terminal PowerShell setup, local URLs, and troubleshooting guidance.
+The local application separates presentation from inference:
+
+```text
+User
+  -> Streamlit
+  -> HTTP
+  -> FastAPI / Uvicorn
+  -> QRT pipeline loaded with Joblib
+  -> predicted probability and class
+```
+
+FastAPI loads and validates the persisted pipeline and metadata. Pydantic validates the 20-feature input schema, and the service exposes `/`, `/health`, `/model-info`, and `/predict`. The multipage Streamlit application uses its HTTP client to call those endpoints; it never loads the model directly.
+
+The application requires two local processes:
+
+```powershell
+python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+```powershell
+python -m streamlit run frontend/streamlit_app.py --server.port 8501
+```
+
+See [Running the QRT FastAPI and Streamlit Applications](docs/run_api_and_streamlit.md) for the complete two-terminal setup, prerequisites, local URLs, and troubleshooting guidance.
 
 ## Tests and quality checks
 
@@ -305,7 +318,7 @@ python -m pytest -q
 python -m pip check
 ```
 
-The validated state at commit `c6acba2` contains **75 passing tests** covering cross-sectional features, evaluation diagnostics, Optuna validation, MLflow tracking, and final-model training utilities.
+The current validated suite contains **119 passing tests**. Coverage includes feature engineering, evaluation diagnostics, Optuna and MLflow infrastructure, final training and serialization checks, the model service, FastAPI endpoints and request validation, and the Streamlit HTTP client. Browser-level visual testing is not claimed.
 
 ## Local artifacts and version control
 
@@ -316,7 +329,7 @@ The following are intentionally ignored by Git:
 - `mlflow_data/`, `mlruns/`, and `mlartifacts/`;
 - locally generated submissions.
 
-A fresh clone therefore does not include the trained model or MLflow database. After making the raw data available locally, regenerate the final model with `python scripts/train_final_gradient_boosting.py` and run the smoke-test runner if local MLflow records are needed.
+A fresh clone therefore does not include the trained Joblib model, its local metadata JSON, or the MLflow database. After making the raw data available locally, regenerate the final model with `python scripts/train_final_gradient_boosting.py` and run the smoke-test runner if local MLflow records are needed. The ignored model artifacts are prerequisites for local inference, not downloadable repository assets.
 
 ## Limitations
 
@@ -327,12 +340,15 @@ A fresh clone therefore does not include the trained model or MLflow database. A
 - Advanced boosting and repeated fold evaluation have meaningful computational cost.
 - Repeated experimentation creates a risk of overfitting the fixed validation protocol.
 - Public leaderboard observations do not guarantee private-leaderboard performance.
-- Local model and tracking artifacts are not distributed through GitHub.
-- This repository is an educational and portfolio project, not financial or trading advice.
+- The Joblib model and its metadata remain local and are not distributed through GitHub.
+- The API processes one prediction at a time and does not expose `/predict-batch`.
+- The local application has no authentication layer.
+- No Docker image, Kubernetes deployment, or cloud deployment is currently provided.
+- This application demonstrates an ML inference workflow; it is not financial or trading advice.
 
 ## Product roadmap
 
-Completed modeling work:
+Completed work:
 
 - [x] Data understanding and exploratory analysis
 - [x] Leakage-safe temporal validation
@@ -342,12 +358,17 @@ Completed modeling work:
 - [x] Optuna infrastructure
 - [x] Local MLflow tracking
 - [x] Final model serialization and metadata validation
+- [x] FastAPI inference service and prediction endpoint
+- [x] Pydantic request validation and API error handling
+- [x] Model-service and API tests
+- [x] Multipage Streamlit interface
+- [x] Streamlit-to-FastAPI HTTP communication
+- [x] Local two-process launch documentation
 
 Remaining product work:
 
-- [ ] FastAPI inference service
-- [ ] API tests and error handling
 - [ ] Docker image
-- [ ] Streamlit interface
 - [ ] Docker Compose orchestration
-- [ ] Serving documentation and deployment
+- [ ] Kubernetes deployment
+- [ ] Cloud deployment
+- [ ] Production observability and CI/CD
