@@ -292,6 +292,10 @@ The requirements include scikit-learn, XGBoost, LightGBM, CatBoost, PyTorch, Opt
 
 Both command-line runners require execution from a clean Git worktree so their metadata describes a reproducible repository state.
 
+## Local inference application
+
+The project now includes a FastAPI inference service and a multipage Streamlit interface that consumes the API over HTTP. See [Running the QRT FastAPI and Streamlit Applications](docs/run_api_and_streamlit.md) for the two-terminal PowerShell setup, local URLs, and troubleshooting guidance.
+
 ## Tests and quality checks
 
 Run the complete test suite and dependency consistency check from the activated environment:
