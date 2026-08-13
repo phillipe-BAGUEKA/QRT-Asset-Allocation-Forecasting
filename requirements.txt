@@ -1,21 +1,4 @@
-numpy
-pandas
-matplotlib
-scikit-learn
-jupyter
-notebook
-ipykernel
-xgboost
-lightgbm
-catboost
-torch
-pytest
-fastapi
-uvicorn
-pydantic
-httpx2
-streamlit
-requests
-optuna==4.9.0
-mlflow==3.14.0
-joblib==1.5.3
+# GENERATED COMPATIBILITY ENTRY POINT - DO NOT EDIT MANUALLY.
+# pyproject.toml is the single source of dependency truth.
+# Regenerate this file only if the installation entry point changes.
+-e .[app,research,dev]

@@ -1,0 +1,6 @@
+methodology = 'V1 expanding-window validation'
+source_commit = 'e64aa6064e723bad935651bd0c664ea9c044ffc0'
+source_branch = 'main'
+status = 'historical_read_only'
+installed_by_default = false
+git_tag_created = false

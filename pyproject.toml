@@ -1,0 +1,44 @@
+[project]
+name = 'qrt-forecasting'
+version = '2.0.0.dev0'
+description = 'Leakage-safe grouped validation for the QRT asset allocation challenge'
+readme = 'README.md'
+requires-python = '>=3.11,<3.14'
+dependencies = [
+    'numpy>=2.0,<3',
+    'pandas>=2.2,<3',
+    'scikit-learn>=1.8,<1.9',
+]
+
+[project.optional-dependencies]
+app = [
+    'fastapi>=0.141,<0.142',
+    'httpx>=0.28,<0.29',
+    'joblib==1.5.3',
+    'pydantic>=2.13,<3',
+    'requests>=2.34,<3',
+    'streamlit>=1.61,<1.62',
+    'uvicorn>=0.52,<0.53',
+]
+research = [
+    'ipykernel>=7,<8',
+    'jupyter>=1.1,<2',
+    'matplotlib>=3.10,<3.11',
+    'nbconvert>=7.17,<8',
+    'notebook>=7.5,<8',
+]
+dev = [
+    'pytest>=9.1,<10',
+]
+
+[tool.setuptools.packages.find]
+where = ['src']
+
+[tool.pytest.ini_options]
+pythonpath = ['src', '.']
+testpaths = ['tests']
+addopts = '-ra'
+
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
