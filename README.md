@@ -6,10 +6,48 @@ an opaque group identifier, not as an ordered date.
 
 ## Current status
 
-The project is being rebuilt progressively around leakage-safe grouped
-validation. The active foundation contains only repository-relative training
-data access and validated binary-target construction. Grouped fold construction
-and its audit are the next authorized component.
+The project has established its leakage-safe grouped-validation foundation.
+`StratifiedGroupKFold` was selected through a model-free structural audit, a
+grouped lockbox was frozen, and five definitive folds were created only on the
+development partition. No V2 model has been trained.
+
+## V2 grouped validation
+
+`TS` is used exclusively as a group identifier. The tracked manifest is:
+
+```text
+reports/validation/v2_grouped_folds_manifest.json
+```
+
+The complete local assignment is ignored by Git and contains `ROW_ID`, `TS`,
+`role` and `fold_id`:
+
+```text
+artifacts/folds/v2_grouped_assignment.csv
+```
+
+Reproduce the audit after installing the project:
+
+```powershell
+python scripts/v2/audit_grouped_validation.py
+```
+
+The frozen split contains 421,654 development rows in 2,028 `TS` groups and
+105,419 lockbox rows in 494 groups. Lockbox rows have no development fold ID
+and must not be used for feature, model, hyperparameter or threshold selection.
+
+The visualization notebook only reads these artifacts. Execute it on an
+ignored copy with:
+
+```powershell
+python -m jupyter nbconvert `
+  --to notebook `
+  --execute research/v2/notebooks/00_grouped_validation_audit.ipynb `
+  --output 00_grouped_validation_audit.executed.ipynb `
+  --output-dir artifacts/notebook_runs `
+  --ExecutePreprocessor.timeout=300 `
+  --ExecutePreprocessor.allow_errors=False
+```
 
 The former expanding-window methodology is preserved read-only under
 `archive/v1/` at source commit

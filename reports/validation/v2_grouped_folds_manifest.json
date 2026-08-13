@@ -1,0 +1,359 @@
+{
+  "assignment_columns": [
+    "ROW_ID",
+    "TS",
+    "role",
+    "fold_id"
+  ],
+  "assignment_sha256": "4c4eaa6133ea4d150b0cfc0efceba9d8686bcb099141f8444b9217f2a211cde7",
+  "configuration": {
+    "audit_n_splits": 5,
+    "candidate_splitters": [
+      "GroupKFold",
+      "StratifiedGroupKFold"
+    ],
+    "development_n_splits": 5,
+    "lockbox_n_splits": 5,
+    "lockbox_selection": {
+      "components": [
+        "absolute_row_fraction_deviation",
+        "absolute_group_fraction_deviation",
+        "absolute_prevalence_deviation"
+      ]
+    },
+    "lockbox_target_fraction": 0.2,
+    "methodology_version": "2.0",
+    "seed": 42,
+    "selection": {
+      "components": [
+        "max_relative_row_deviation",
+        "max_relative_group_deviation",
+        "max_absolute_prevalence_deviation"
+      ],
+      "hard_invariants_required": true,
+      "primary": "worst_balance_deviation",
+      "secondary": "total_balance_deviation"
+    }
+  },
+  "data_fingerprint_sha256": "288d608c16d137dec90d0705fdd1c39e8cde69d221ca3203526b34297652c0b0",
+  "development_identifiers_sha256": "5831a7feebea1b4cbed2df2cfdaac72f2e17cff1cc017349f2b713b06c694a9e",
+  "lockbox_identifiers_sha256": "eaed8a4631941bb756160ee645bbc89f0211cf9d17436893b3b956d95f8637fd",
+  "methodology": "grouped_development_lockbox",
+  "partition": {
+    "development": {
+      "group_fraction": 0.8041237113402062,
+      "n_groups": 2028,
+      "n_negative": 207814,
+      "n_positive": 213840,
+      "n_rows": 421654,
+      "positive_rate": 0.507145669197968,
+      "row_fraction": 0.7999916520102528
+    },
+    "development_fold_audit": {
+      "folds": [
+        {
+          "absolute_prevalence_deviation": 0.00020117284492804366,
+          "fold_id": 0,
+          "n_groups": 409,
+          "n_negative": 41575,
+          "n_positive": 42815,
+          "n_rows": 84390,
+          "positive_rate": 0.507346842042896,
+          "relative_group_deviation": 0.008382642998027557,
+          "relative_row_deviation": 0.000701997372253045
+        },
+        {
+          "absolute_prevalence_deviation": 1.0262408663974654e-05,
+          "fold_id": 1,
+          "n_groups": 400,
+          "n_negative": 41582,
+          "n_positive": 42786,
+          "n_rows": 84368,
+          "positive_rate": 0.507135406789304,
+          "relative_group_deviation": 0.013806706114398477,
+          "relative_row_deviation": 0.00044111997040223845
+        },
+        {
+          "absolute_prevalence_deviation": 0.00017510573914469862,
+          "fold_id": 2,
+          "n_groups": 403,
+          "n_negative": 41554,
+          "n_positive": 42729,
+          "n_rows": 84283,
+          "positive_rate": 0.5069705634588233,
+          "relative_group_deviation": 0.0064102564102564655,
+          "relative_row_deviation": 0.0005668154458395142
+        },
+        {
+          "absolute_prevalence_deviation": 9.338254744795105e-05,
+          "fold_id": 3,
+          "n_groups": 406,
+          "n_negative": 41520,
+          "n_positive": 42708,
+          "n_rows": 84228,
+          "positive_rate": 0.50705228665052,
+          "relative_group_deviation": 0.0009861932938855455,
+          "relative_row_deviation": 0.0012190089504665307
+        },
+        {
+          "absolute_prevalence_deviation": 7.717846453125787e-05,
+          "fold_id": 4,
+          "n_groups": 410,
+          "n_negative": 41583,
+          "n_positive": 42802,
+          "n_rows": 84385,
+          "positive_rate": 0.5072228476624993,
+          "relative_group_deviation": 0.01084812623274156,
+          "relative_row_deviation": 0.0006427070536505889
+        }
+      ],
+      "global_positive_rate": 0.507145669197968,
+      "max_absolute_prevalence_deviation": 0.00020117284492804366,
+      "max_relative_group_deviation": 0.013806706114398477,
+      "max_relative_row_deviation": 0.0012190089504665307,
+      "n_groups": 2028,
+      "n_rows": 421654,
+      "total_balance_deviation": 0.015226887909793051,
+      "valid": true,
+      "violations": [],
+      "worst_balance_deviation": 0.013806706114398477
+    },
+    "lockbox": {
+      "group_fraction": 0.1958762886597938,
+      "n_groups": 494,
+      "n_negative": 51936,
+      "n_positive": 53483,
+      "n_rows": 105419,
+      "positive_rate": 0.5073373869985487,
+      "row_fraction": 0.20000834798974715
+    },
+    "lockbox_candidates": [
+      {
+        "absolute_group_fraction_deviation": 0.0010309278350515427,
+        "absolute_prevalence_deviation": 0.0003345692442899839,
+        "absolute_row_fraction_deviation": 0.00014722818281340255,
+        "candidate_fold_id": 0,
+        "group_fraction": 0.20103092783505155,
+        "n_groups": 507,
+        "n_rows": 105337,
+        "positive_rate": 0.5068494451142523,
+        "row_fraction": 0.1998527718171866
+      },
+      {
+        "absolute_group_fraction_deviation": 0.0026169706582077623,
+        "absolute_prevalence_deviation": 0.00028815465661058415,
+        "absolute_row_fraction_deviation": 8.234153523326015e-05,
+        "candidate_fold_id": 1,
+        "group_fraction": 0.20261697065820777,
+        "n_groups": 511,
+        "n_rows": 105458,
+        "positive_rate": 0.5074721690151529,
+        "row_fraction": 0.20008234153523327
+      },
+      {
+        "absolute_group_fraction_deviation": 0.003013481363996817,
+        "absolute_prevalence_deviation": 8.491712750813285e-05,
+        "absolute_row_fraction_deviation": 6.564555573895792e-05,
+        "candidate_fold_id": 2,
+        "group_fraction": 0.20301348136399683,
+        "n_groups": 512,
+        "n_rows": 105380,
+        "positive_rate": 0.5072689314860505,
+        "row_fraction": 0.19993435444426105
+      },
+      {
+        "absolute_group_fraction_deviation": 0.004123711340206199,
+        "absolute_prevalence_deviation": 0.0001533726400063662,
+        "absolute_row_fraction_deviation": 8.347989747137241e-06,
+        "candidate_fold_id": 3,
+        "group_fraction": 0.1958762886597938,
+        "n_groups": 494,
+        "n_rows": 105419,
+        "positive_rate": 0.5073373869985487,
+        "row_fraction": 0.20000834798974715
+      },
+      {
+        "absolute_group_fraction_deviation": 0.002537668517049979,
+        "absolute_prevalence_deviation": 0.00019210127631741347,
+        "absolute_row_fraction_deviation": 0.00012218421357193532,
+        "candidate_fold_id": 4,
+        "group_fraction": 0.19746233148295003,
+        "n_groups": 498,
+        "n_rows": 105479,
+        "positive_rate": 0.5069919130822249,
+        "row_fraction": 0.20012218421357195
+      }
+    ],
+    "lockbox_selected_candidate_fold": 3,
+    "lockbox_target_fraction": 0.2,
+    "seed": 42,
+    "selected_splitter": "StratifiedGroupKFold"
+  },
+  "schema_version": 1,
+  "splitter_selection": {
+    "balance_components": [
+      "max_relative_row_deviation",
+      "max_relative_group_deviation",
+      "max_absolute_prevalence_deviation"
+    ],
+    "candidate_audits": [
+      {
+        "folds": [
+          {
+            "absolute_prevalence_deviation": 0.0007576274590804788,
+            "fold_id": 0,
+            "n_groups": 505,
+            "n_negative": 50998,
+            "n_positive": 52326,
+            "n_rows": 103324,
+            "positive_rate": 0.5064263868994618,
+            "relative_group_deviation": 0.0011895321173672141,
+            "relative_row_deviation": 0.019832167460674382
+          },
+          {
+            "absolute_prevalence_deviation": 0.0072310563576390985,
+            "fold_id": 1,
+            "n_groups": 505,
+            "n_negative": 53149,
+            "n_positive": 53139,
+            "n_rows": 106288,
+            "positive_rate": 0.4999529580009032,
+            "relative_group_deviation": 0.0011895321173672141,
+            "relative_row_deviation": 0.008285379824047088
+          },
+          {
+            "absolute_prevalence_deviation": 0.0022356121518933847,
+            "fold_id": 2,
+            "n_groups": 504,
+            "n_negative": 53591,
+            "n_positive": 55649,
+            "n_rows": 109240,
+            "positive_rate": 0.5094196265104357,
+            "relative_group_deviation": 0.0007930214115780676,
+            "relative_row_deviation": 0.036289090884943774
+          },
+          {
+            "absolute_prevalence_deviation": 0.009187096472472178,
+            "fold_id": 3,
+            "n_groups": 504,
+            "n_negative": 49881,
+            "n_positive": 53258,
+            "n_rows": 103139,
+            "positive_rate": 0.5163711108310145,
+            "relative_group_deviation": 0.0007930214115780676,
+            "relative_row_deviation": 0.021587142577973124
+          },
+          {
+            "absolute_prevalence_deviation": 0.003282299507283315,
+            "fold_id": 4,
+            "n_groups": 504,
+            "n_negative": 52131,
+            "n_positive": 52951,
+            "n_rows": 105082,
+            "positive_rate": 0.503901714851259,
+            "relative_group_deviation": 0.0007930214115780676,
+            "relative_row_deviation": 0.003155160670343632
+          }
+        ],
+        "global_positive_rate": 0.5071840143585423,
+        "max_absolute_prevalence_deviation": 0.009187096472472178,
+        "max_relative_group_deviation": 0.0011895321173672141,
+        "max_relative_row_deviation": 0.036289090884943774,
+        "n_groups": 2522,
+        "n_rows": 527073,
+        "n_splits": 5,
+        "seed": 42,
+        "splitter": "GroupKFold",
+        "total_balance_deviation": 0.046665719474783166,
+        "valid": true,
+        "violations": [],
+        "worst_balance_deviation": 0.036289090884943774
+      },
+      {
+        "folds": [
+          {
+            "absolute_prevalence_deviation": 0.0003345692442899839,
+            "fold_id": 0,
+            "n_groups": 507,
+            "n_negative": 51947,
+            "n_positive": 53390,
+            "n_rows": 105337,
+            "positive_rate": 0.5068494451142523,
+            "relative_group_deviation": 0.005154639175257777,
+            "relative_row_deviation": 0.0007361409140669871
+          },
+          {
+            "absolute_prevalence_deviation": 0.00028815465661058415,
+            "fold_id": 1,
+            "n_groups": 511,
+            "n_negative": 51941,
+            "n_positive": 53517,
+            "n_rows": 105458,
+            "positive_rate": 0.5074721690151529,
+            "relative_group_deviation": 0.013084853291038904,
+            "relative_row_deviation": 0.0004117076761662443
+          },
+          {
+            "absolute_prevalence_deviation": 8.491712750813285e-05,
+            "fold_id": 2,
+            "n_groups": 512,
+            "n_negative": 51924,
+            "n_positive": 53456,
+            "n_rows": 105380,
+            "positive_rate": 0.5072689314860505,
+            "relative_group_deviation": 0.015067406819984185,
+            "relative_row_deviation": 0.000328227778694847
+          },
+          {
+            "absolute_prevalence_deviation": 0.0001533726400063662,
+            "fold_id": 3,
+            "n_groups": 494,
+            "n_negative": 51936,
+            "n_positive": 53483,
+            "n_rows": 105419,
+            "positive_rate": 0.5073373869985487,
+            "relative_group_deviation": 0.020618556701030882,
+            "relative_row_deviation": 4.173994873569865e-05
+          },
+          {
+            "absolute_prevalence_deviation": 0.00019210127631741347,
+            "fold_id": 4,
+            "n_groups": 498,
+            "n_negative": 52002,
+            "n_positive": 53477,
+            "n_rows": 105479,
+            "positive_rate": 0.5069919130822249,
+            "relative_group_deviation": 0.012688342585249757,
+            "relative_row_deviation": 0.000610921067859615
+          }
+        ],
+        "global_positive_rate": 0.5071840143585423,
+        "max_absolute_prevalence_deviation": 0.0003345692442899839,
+        "max_relative_group_deviation": 0.020618556701030882,
+        "max_relative_row_deviation": 0.0007361409140669871,
+        "n_groups": 2522,
+        "n_rows": 527073,
+        "n_splits": 5,
+        "seed": 42,
+        "splitter": "StratifiedGroupKFold",
+        "total_balance_deviation": 0.021689266859387855,
+        "valid": true,
+        "violations": [],
+        "worst_balance_deviation": 0.020618556701030882
+      }
+    ],
+    "criteria_defined_before_audit": true,
+    "hard_invariants": [
+      "no_group_overlap",
+      "complete_row_coverage",
+      "both_classes_in_train_and_validation"
+    ],
+    "selected_splitter": "StratifiedGroupKFold"
+  },
+  "versions": {
+    "numpy": "2.4.4",
+    "pandas": "2.3.3",
+    "python": "3.13.7",
+    "scikit_learn": "1.8.0"
+  }
+}

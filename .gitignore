@@ -56,3 +56,6 @@ catboost_info/
 /mlflow.db
 /mlruns/
 /mlartifacts/
+
+# V2 generated validation and research artifacts
+/artifacts/

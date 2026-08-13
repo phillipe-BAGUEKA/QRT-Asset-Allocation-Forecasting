@@ -1,0 +1,24 @@
+methodology_version = '2.0'
+seed = 42
+candidate_splitters = ['GroupKFold', 'StratifiedGroupKFold']
+audit_n_splits = 5
+lockbox_n_splits = 5
+lockbox_target_fraction = 0.20
+development_n_splits = 5
+
+[selection]
+hard_invariants_required = true
+primary = 'worst_balance_deviation'
+secondary = 'total_balance_deviation'
+components = [
+    'max_relative_row_deviation',
+    'max_relative_group_deviation',
+    'max_absolute_prevalence_deviation',
+]
+
+[lockbox_selection]
+components = [
+    'absolute_row_fraction_deviation',
+    'absolute_group_fraction_deviation',
+    'absolute_prevalence_deviation',
+]
