@@ -1,0 +1,35 @@
+experiment_id = 'GB_RET20_REFERENCE'
+feature_columns = [
+    'RET_1', 'RET_2', 'RET_3', 'RET_4', 'RET_5',
+    'RET_6', 'RET_7', 'RET_8', 'RET_9', 'RET_10',
+    'RET_11', 'RET_12', 'RET_13', 'RET_14', 'RET_15',
+    'RET_16', 'RET_17', 'RET_18', 'RET_19', 'RET_20',
+]
+target_column = 'class'
+group_column = 'TS'
+row_id_column = 'ROW_ID'
+threshold = 0.5
+random_state = 42
+
+[preprocessing]
+strategy = 'constant'
+fill_value = 0.0
+
+[model]
+learning_rate = 0.05
+n_estimators = 50
+max_depth = 2
+min_samples_leaf = 20
+subsample = 0.7
+max_features = 'sqrt'
+
+[validation]
+n_splits = 5
+assignment_path = 'artifacts/folds/v2_grouped_assignment.csv'
+manifest_path = 'reports/validation/v2_grouped_folds_manifest.json'
+manifest_file_sha256 = '266924abe936b9442a4dce6f905494eb7346493c9032bc069cfaafb841cd2e82'
+data_fingerprint_sha256 = '288d608c16d137dec90d0705fdd1c39e8cde69d221ca3203526b34297652c0b0'
+assignment_sha256 = '4c4eaa6133ea4d150b0cfc0efceba9d8686bcb099141f8444b9217f2a211cde7'
+development_identifiers_sha256 = '5831a7feebea1b4cbed2df2cfdaac72f2e17cff1cc017349f2b713b06c694a9e'
+lockbox_identifiers_sha256 = 'eaed8a4631941bb756160ee645bbc89f0211cf9d17436893b3b956d95f8637fd'
+development_n_rows = 421654
