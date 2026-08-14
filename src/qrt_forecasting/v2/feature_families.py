@@ -74,6 +74,21 @@ def categorical_feature_sets(best_numeric: FeatureSet) -> tuple[FeatureSet, ...]
     )
 
 
+def feature_set_by_id(
+    experiment_id: str,
+    *,
+    best_numeric: FeatureSet | None = None,
+) -> FeatureSet:
+    '''Resolve one declared feature set without accepting ad-hoc columns.'''
+    candidates = list(NUMERIC_FEATURE_SETS)
+    if best_numeric is not None:
+        candidates.extend(categorical_feature_sets(best_numeric))
+    matches = [item for item in candidates if item.experiment_id == experiment_id]
+    if len(matches) != 1:
+        raise ValueError(f'Unknown or ambiguous feature set {experiment_id}.')
+    return matches[0]
+
+
 def build_feature_family_pipeline(feature_set: FeatureSet) -> Pipeline:
     '''Create a fresh GB pipeline whose preprocessing is fitted inside a fold.'''
     numeric_imputer = SimpleImputer(

@@ -65,6 +65,46 @@ def validate_reference_gate(
     return summary
 
 
+def validate_feature_study_gate(
+    artifact_directory: Path,
+    *,
+    assignment_sha256: str,
+) -> tuple[dict[str, Any], str]:
+    '''Validate the frozen feature-study decision before loading test data.'''
+    summary_path = Path(artifact_directory).resolve() / 'study_summary.json'
+    if not summary_path.is_file():
+        raise ValueError('Feature-study summary artifact is missing.')
+    with summary_path.open(encoding='utf-8') as source:
+        summary = json.load(source)
+    expected = {
+        'evaluation_scope': 'development_oof_only',
+        'assignment_sha256': assignment_sha256,
+        'second_submission_gate_passed': True,
+        'lockbox_metrics_computed': False,
+    }
+    for key, expected_value in expected.items():
+        if summary.get(key) != expected_value:
+            raise ValueError(f'Feature-study summary field {key} is invalid.')
+    selected = summary.get('selected_submission_candidate')
+    if not isinstance(selected, str) or not selected:
+        raise ValueError('Feature-study summary has no selected candidate.')
+    selected_results = [
+        item for item in summary.get('experiments', [])
+        if item.get('experiment_id') == selected
+    ]
+    if len(selected_results) != 1 or selected_results[0]['gate']['admissible'] is not True:
+        raise ValueError('Selected feature-study candidate is not admissible.')
+    reproducibility = selected_results[0].get('reproducibility', {})
+    if (
+        reproducibility.get('real_second_run_performed') is not True
+        or reproducibility.get('canonical_prediction_match') is not True
+        or reproducibility.get('run_1_oof_sha256')
+        != reproducibility.get('run_2_oof_sha256')
+    ):
+        raise ValueError('Selected candidate reproducibility is invalid.')
+    return summary, selected
+
+
 def fit_full_training_pipeline(
     training_data: pd.DataFrame,
     *,
