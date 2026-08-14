@@ -134,6 +134,7 @@ def evaluate_grouped_oof(
     pipeline_factory: Callable[[], Pipeline],
     threshold: float = 0.5,
     n_splits: int = 5,
+    compute_group_metrics: bool = True,
 ) -> OOFRunResult:
     '''Fit one fresh pipeline per fold and predict each development row once.'''
     if not 0.0 <= threshold <= 1.0:
@@ -213,14 +214,17 @@ def evaluate_grouped_oof(
     global_metrics['weighted_fold_accuracy'] = weighted_accuracy
 
     group_rows: list[dict[str, Any]] = []
-    for group, group_frame in oof.groupby('TS', sort=True, observed=True):
-        group_row = binary_classification_metrics(
-            group_frame['y_true'].to_numpy(),
-            group_frame['y_proba'].to_numpy(),
-            threshold=threshold,
-        )
-        group_row.update({'TS': group, 'fold_id': int(group_frame['fold_id'].iloc[0])})
-        group_rows.append(group_row)
+    if compute_group_metrics:
+        for group, group_frame in oof.groupby('TS', sort=True, observed=True):
+            group_row = binary_classification_metrics(
+                group_frame['y_true'].to_numpy(),
+                group_frame['y_proba'].to_numpy(),
+                threshold=threshold,
+            )
+            group_row.update(
+                {'TS': group, 'fold_id': int(group_frame['fold_id'].iloc[0])}
+            )
+            group_rows.append(group_row)
     group_metrics = pd.DataFrame(group_rows)
 
     counts, edges = np.histogram(oof['y_proba'], bins=np.linspace(0.0, 1.0, 21))

@@ -31,15 +31,16 @@ def test_model_diagnostics_notebook_is_artifact_only() -> None:
     notebook = json.loads(notebook_path.read_text(encoding='utf-8'))
     code = _notebook_code('01_model_diagnostics.ipynb')
 
-    assert 'oof_predictions.csv' in code
+    assert 'comparison.csv' in code
+    assert 'feature_inventory.csv' in code
     assert 'fold_metrics.csv' in code
-    assert 'group_metrics.csv' in code
-    assert 'summary.json' in code
+    assert 'study_summary.json' in code
     assert '.fit(' not in code
     assert 'GradientBoostingClassifier' not in code
     assert 'build_gradient_boosting_reference_pipeline' not in code
     assert 'X_test' not in code
     assert 'load_training' not in code
+    assert 'data/raw' not in code
     assert all(not cell.get('outputs') for cell in notebook['cells'])
     assert all(cell.get('execution_count') is None for cell in notebook['cells'] if cell['cell_type'] == 'code')
 

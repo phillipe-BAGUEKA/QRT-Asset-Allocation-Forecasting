@@ -1,0 +1,14 @@
+study_id = 'GB_FEATURE_FAMILY_STUDY'
+reference_experiment_id = 'GB_RET20_REFERENCE'
+reference_accuracy_gate = 0.520005
+minimum_accuracy_gain = 0.001
+threshold = 0.5
+random_state = 42
+bootstrap_seed = 20260813
+bootstrap_iterations = 2000
+maximum_log_loss_degradation = 0.005
+
+[validation]
+n_splits = 5
+assignment_sha256 = '4c4eaa6133ea4d150b0cfc0efceba9d8686bcb099141f8444b9217f2a211cde7'
+development_identifiers_sha256 = '5831a7feebea1b4cbed2df2cfdaac72f2e17cff1cc017349f2b713b06c694a9e'
