@@ -4,8 +4,8 @@ import json
 from pathlib import Path
 
 from qrt_forecasting.v2.gradient_boosting import (
-    file_sha256,
     load_experiment_configuration,
+    sha256_canonical_text,
 )
 
 
@@ -28,7 +28,7 @@ def test_gb_ret20_reference_configuration_and_report_are_immutable() -> None:
     configuration = load_experiment_configuration(configuration_path)
     report = json.loads(report_path.read_text(encoding='utf-8'))
 
-    assert file_sha256(configuration_path) == (
+    assert sha256_canonical_text(configuration_path) == (
         '3ef7899676d8a51ee0372b7dc592312f20fba2acfa42906eec9feea8729809df'
     )
     assert configuration['experiment_id'] == 'GB_RET20_REFERENCE'

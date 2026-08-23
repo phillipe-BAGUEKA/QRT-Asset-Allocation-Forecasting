@@ -21,7 +21,10 @@ from qrt_forecasting.v2.feature_families import (
     build_feature_family_pipeline,
 )
 from qrt_forecasting.v2.folds import load_assignment_artifacts
-from qrt_forecasting.v2.gradient_boosting import file_sha256
+from qrt_forecasting.v2.gradient_boosting import (
+    file_sha256,
+    sha256_canonical_text,
+)
 from qrt_forecasting.v2.submission import (
     build_submission_frame,
     dataframe_row_id_sha256,
@@ -142,7 +145,7 @@ def main() -> None:
         test_features, sample_submission, predictions
     )
 
-    study_hash = file_sha256(STUDY_CONFIG_PATH)
+    study_hash = sha256_canonical_text(STUDY_CONFIG_PATH)
     submission_id = (
         selected.experiment_id
         + '_FULL_TRAIN_'

@@ -1,0 +1,2 @@
+# Configurations méthodologiques hashées : fins de ligne stables sur tous les OS
+*.toml text eol=lf

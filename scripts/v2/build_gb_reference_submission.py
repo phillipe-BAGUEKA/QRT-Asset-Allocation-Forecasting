@@ -19,8 +19,8 @@ from qrt_forecasting.common.target import build_binary_training_frame
 from qrt_forecasting.v2.folds import load_assignment_artifacts
 from qrt_forecasting.v2.gradient_boosting import (
     build_gradient_boosting_reference_pipeline,
-    file_sha256,
     load_experiment_configuration,
+    sha256_canonical_text,
 )
 from qrt_forecasting.v2.submission import (
     build_submission_frame,
@@ -92,7 +92,7 @@ def _atomic_json_write(path: Path, payload: dict[str, Any]) -> None:
 
 def main() -> None:
     configuration = load_experiment_configuration(CONFIGURATION_PATH)
-    configuration_hash = file_sha256(CONFIGURATION_PATH)
+    configuration_hash = sha256_canonical_text(CONFIGURATION_PATH)
     validation = configuration['validation']
     _, frozen_manifest = load_assignment_artifacts(
         REPOSITORY_ROOT / validation['assignment_path'],

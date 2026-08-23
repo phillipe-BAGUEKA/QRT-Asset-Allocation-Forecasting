@@ -25,6 +25,7 @@ from qrt_forecasting.v2.gradient_boosting import (
     build_gradient_boosting_reference_pipeline,
     file_sha256,
     load_experiment_configuration,
+    sha256_canonical_text,
 )
 
 
@@ -159,7 +160,7 @@ def _persist_results(
         'features': configuration['feature_columns'],
         'threshold': configuration['threshold'],
         'random_state': configuration['random_state'],
-        'configuration_sha256': file_sha256(CONFIGURATION_PATH),
+        'configuration_sha256': sha256_canonical_text(CONFIGURATION_PATH),
         'assignment_sha256': configuration['validation']['assignment_sha256'],
         'development_identifiers_sha256': configuration['validation'][
             'development_identifiers_sha256'

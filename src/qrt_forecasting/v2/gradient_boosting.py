@@ -85,3 +85,10 @@ def file_sha256(path: Path) -> str:
         for block in iter(lambda: source.read(1024 * 1024), b''):
             digest.update(block)
     return digest.hexdigest()
+
+
+def sha256_canonical_text(path: Path) -> str:
+    '''Hash methodological text after canonicalizing CRLF line endings to LF.'''
+    raw_content = Path(path).read_bytes()
+    canonical_content = raw_content.replace(b'\r\n', b'\n')
+    return hashlib.sha256(canonical_content).hexdigest()
