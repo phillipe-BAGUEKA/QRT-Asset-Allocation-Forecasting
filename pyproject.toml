@@ -21,11 +21,16 @@ app = [
     'uvicorn>=0.52,<0.53',
 ]
 research = [
+    'catboost==1.2.10',
     'ipykernel>=7,<8',
     'jupyter>=1.1,<2',
+    'lightgbm==4.6.0',
     'matplotlib>=3.10,<3.11',
+    'mlflow==3.14.0',
     'nbconvert>=7.17,<8',
     'notebook>=7.5,<8',
+    'optuna==4.9.0',
+    'xgboost==3.3.0',
 ]
 dev = [
     'pytest>=9.1,<10',
