@@ -7,9 +7,11 @@ from pathlib import Path
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-MODEL_PATH = PROJECT_ROOT / "models" / "gradient_boosting_ret20_v1.joblib"
+MODEL_PATH = PROJECT_ROOT / "models" / "gradient_boosting_ret20_final.joblib"
 METADATA_PATH = (
-    PROJECT_ROOT / "models" / "gradient_boosting_ret20_v1.metadata.json"
+    PROJECT_ROOT
+    / "models"
+    / "gradient_boosting_ret20_final.manifest.json"
 )
 IMAGES_DIR = PROJECT_ROOT / "images"
 QRT_LOGO_PATH = IMAGES_DIR / "QRT-Brand-Master-Full-WO-HR.png"
@@ -19,7 +21,7 @@ EXPECTED_FEATURE_COLUMNS = tuple(
 )
 
 API_BASE_URL_ENV_VAR = "QRT_API_BASE_URL"
-DEFAULT_API_BASE_URL = "http://127.0.0.1:8000"
+DEFAULT_API_BASE_URL = "http://localhost:8000"
 
 
 def get_api_base_url() -> str:

@@ -1,117 +1,212 @@
-# QRT Asset Allocation Forecasting
+# QRT Challenge Data — Predicting Asset Allocation Return Direction
 
-This repository predicts whether the future performance of an asset allocation
-is positive or negative. V2 is now the active research path and treats `TS` as
-an opaque group identifier, not as an ordered date.
+[![Python 3.11-3.13](https://img.shields.io/badge/Python-3.11--3.13-3776AB?style=flat-square&logo=python&logoColor=white)](https://docs.python.org/3/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](https://docs.docker.com/)
+[![Quantitative Finance](https://img.shields.io/badge/Quantitative%20Finance-Challenge%20Data-3B4CCA?style=flat-square)](https://challengedata.ens.fr/challenges/167)
 
-## Current status
+## Overview
 
-The project has established its leakage-safe grouped-validation foundation.
-`StratifiedGroupKFold` was selected through a model-free structural audit, a
-grouped lockbox was frozen, and five definitive folds were created only on the
-development partition. No V2 model has been trained.
+This is an end-to-end binary-classification project for the QRT Challenge Data
+asset-allocation problem. It predicts whether an allocation's next return will
+be positive. The repository covers group-aware validation, reproducible model
+selection, a persisted scikit-learn pipeline, tested FastAPI inference, a
+Streamlit demonstration, Docker Compose, and continuous integration.
 
-## V2 grouped validation
+The final model is intentionally small and understandable. The project is
+closed as a portfolio case study: methodological discipline and reliable
+serving take precedence over further leaderboard optimization.
 
-`TS` is used exclusively as a group identifier. The tracked manifest is:
+## Challenge and data
 
-```text
-reports/validation/v2_grouped_folds_manifest.json
-```
+The target is the sign of a future continuous return: positive values map to
+class `1`; zero or negative values map to class `0`. Inputs include twenty raw
+lagged returns (`RET_1` to `RET_20`), signed volumes, allocation identifiers,
+and anonymized `TS` groups. The final model uses only the twenty returns.
 
-The complete local assignment is ignored by Git and contains `ROW_ID`, `TS`,
-`role` and `fold_id`:
+The labelled dataset contains 527,073 rows in 2,522 `TS` groups. Raw challenge
+CSVs are deliberately excluded from Git. See the
+[official challenge](https://challengedata.ens.fr/challenges/167) for access
+and terms. This repository is a personal, unofficial solution and is not
+affiliated with QRT or Challenge Data.
 
-```text
-artifacts/folds/v2_grouped_assignment.csv
-```
+## From V1 to V2
 
-Reproduce the audit after installing the project:
+| Area | V1 | V2 (active) |
+|---|---|---|
+| Validation assumption | Expanding windows based on a presumed order of anonymized `TS` values | `TS` treated only as an opaque group |
+| Development protocol | Four temporal-style folds | Five-fold `StratifiedGroupKFold` on development |
+| Final assessment | Public leaderboard used as an external signal | Frozen 20% grouped lockbox evaluated after model freeze |
+| Workflow | Notebook-led experimentation | Configurations, scripts, tests, reports, and hashes |
+| Serving | Local V1 artifact | Versioned final V2 artifact |
+| Reproducibility | Historical research snapshot | Notebook-free pipeline, Docker, and CI |
 
-```powershell
-python scripts/v2/audit_grouped_validation.py
-```
+V1's chronological interpretation cannot be defended from the anonymized data
+alone. This does not prove that V1 leaked; it means its core assumption and the
+associated methodological risk were insufficiently controlled. V1 remains
+read-only under `legacy/v1/` at source commit
+`e64aa6064e723bad935651bd0c664ea9c044ffc0`.
 
-The frozen split contains 421,654 development rows in 2,028 `TS` groups and
-105,419 lockbox rows in 494 groups. Lockbox rows have no development fold ID
-and must not be used for feature, model, hyperparameter or threshold selection.
+## Validation strategy
 
-The visualization notebook only reads these artifacts. Execute it on an
-ignored copy with:
-
-```powershell
-python -m jupyter nbconvert `
-  --to notebook `
-  --execute research/v2/notebooks/00_grouped_validation_audit.ipynb `
-  --output 00_grouped_validation_audit.executed.ipynb `
-  --output-dir artifacts/notebook_runs `
-  --ExecutePreprocessor.timeout=300 `
-  --ExecutePreprocessor.allow_errors=False
-```
-
-The former expanding-window methodology is preserved read-only under
-`archive/v1/` at source commit
-`e64aa6064e723bad935651bd0c664ea9c044ffc0`. Its notebooks, research modules,
-training scripts, historical tests and submission log are not part of the
-active V2 package.
-
-## Application status
-
-`app/`, `frontend/` and their tests remain active. They continue to serve the
-locally generated `gradient_boosting_ret20_v1` artifact. This is an explicit
-temporary compatibility state: the application has not yet been promoted to a
-V2 model, and no V2 performance claim is made by the interface.
-
-The local application still requires the ignored V1 files:
+All rows sharing a `TS` stay together. The frozen assignment first separates
+421,654 development rows (2,028 groups) from 105,419 lockbox rows (494 groups).
+Five definitive stratified group folds exist only inside development. Model and
+feature decisions use development out-of-fold predictions; the lockbox is not
+used for selection. The final pipeline is then refitted on all labelled rows.
 
 ```text
-models/gradient_boosting_ret20_v1.joblib
-models/gradient_boosting_ret20_v1.metadata.json
+Labelled data
+|-- Development (80%) -> five group-aware OOF folds -> model freeze
+`-- Lockbox (20%)     -> one final assessment after freeze
+                                      |
+                                      v
+                             full-train refit
 ```
 
-See `docs/run_api_and_streamlit.md` for the FastAPI and Streamlit commands.
+The first lockbox computation was lost before persistence because a downstream
+test CSV used `;` rather than `,`. An explicitly authorized, identical technical
+rerun recorded the metrics atomically. No first-attempt metric was observed,
+and no model, feature, parameter, seed, threshold, or decision changed between
+attempts. See the immutable lockbox report for the full incident record.
 
-## Installation
+## Final model
 
-`pyproject.toml` is the single source of dependency truth. Dependencies are
-separated into:
+The persisted pipeline contains an ordered `RET_1`-to-`RET_20` selector, a
+constant-zero `SimpleImputer`, and scikit-learn's
+`GradientBoostingClassifier`. It uses:
 
-- core: data handling and grouped validation;
-- app: FastAPI, Streamlit and V1 artifact serving;
-- research: notebook execution and plotting;
-- dev: tests.
+| Parameter | Value |
+|---|---:|
+| `n_estimators` | 50 |
+| `learning_rate` | 0.05 |
+| `max_depth` | 2 |
+| `min_samples_leaf` | 20 |
+| `subsample` | 0.7 |
+| `max_features` | `sqrt` |
+| `random_state` | 42 |
+| decision threshold | 0.5 |
 
-For the complete local development environment:
+No scaler is needed for this tree model. The final choice deliberately favors
+simplicity, reproducibility, and a clear inference contract.
 
-```powershell
-python -m pip install -e '.[app,research,dev]'
-```
+## Results
 
-`requirements.txt` is retained only as a generated compatibility entry point
-and must not be edited manually.
+| Scope | Accuracy | ROC-AUC | Log-loss |
+|---|---:|---:|---:|
+| Development OOF (421,654 rows) | 0.520005 | 0.526351 | 0.692253 |
+| Final lockbox (105,419 rows) | 0.520087 | 0.527912 | 0.692218 |
 
-## Data
+The lockbox confusion matrix is TN=16,931, FP=35,005, FN=15,587,
+TP=37,896. Its observed positive rate is 0.507337 and predicted positive rate
+is 0.691536. The historical V1 public leaderboard score was approximately
+0.50957; it is a different external metric and is not directly comparable to
+local ROC-AUC or accuracy.
 
-Authorized challenge CSV files remain local and ignored under `data/raw/`.
-The active package exposes loaders only for `X_train.csv` and `y_train.csv`.
-Validation design and model selection must not access challenge test data.
+The final artifact was refitted on all 527,073 labelled rows, so it has no
+additional honest local performance estimate. The signal is weak and remains
+close to chance. This is not evidence of a profitable trading strategy.
 
-## Repository layout
+## Architecture
 
 ```text
-archive/v1/             Read-only V1 research and modeling snapshot
-app/                    Active FastAPI service, still serving the V1 model
-frontend/               Active Streamlit client
-research/references/    Read-only official benchmark reference
-src/qrt_forecasting/    Installable active V2 package
-tests/                  Active V2, application and frontend tests
+Streamlit :8501 -> FastAPI :8000 -> scikit-learn Pipeline -> JSON prediction
 ```
 
-## Guardrails
+```text
+app/                    FastAPI inference service
+frontend/               Streamlit API client
+models/                 Versioned final Joblib and manifest
+src/qrt_forecasting/    Active reusable package
+configs/                Frozen experiment and final configurations
+reports/                Validation, experiment, and final reports
+tests/                  Unit, methodology, API, and integration tests
+legacy/v1/              Read-only historical V1
+```
 
-- `TS` is a group identifier only.
-- All rows sharing a `TS` must stay together.
-- V2 components are added only when an authorized phase needs them.
-- The lockbox, model training, optimization and submissions are outside the
-  current package-foundation step.
-- Deep learning is outside the authorized scope.
+The official benchmark notebook remains under `research/references/` for
+read-only context. No notebook is required to train, evaluate, serve, or test
+the final model.
+
+## Run locally
+
+Python 3.11 through 3.13 is supported; CI and Docker use Python 3.13.
+
+```bash
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+# Linux/macOS: source .venv/bin/activate
+python -m pip install -e ".[app,dev]"
+uvicorn app.main:app --reload --port 8000
+```
+
+In a second terminal:
+
+```bash
+streamlit run frontend/streamlit_app.py
+```
+
+Run tests with `python -m pytest -q`.
+
+## Run with Docker
+
+```bash
+docker compose build
+docker compose up -d
+```
+
+Open FastAPI at <http://localhost:8000/docs> and Streamlit at
+<http://localhost:8501>. Stop both services with `docker compose down`.
+
+## API example
+
+`POST /predict` accepts exactly twenty fields. A minimal payload sets each to
+zero:
+
+```json
+{
+  "RET_1": 0.0, "RET_2": 0.0, "RET_3": 0.0, "RET_4": 0.0,
+  "RET_5": 0.0, "RET_6": 0.0, "RET_7": 0.0, "RET_8": 0.0,
+  "RET_9": 0.0, "RET_10": 0.0, "RET_11": 0.0, "RET_12": 0.0,
+  "RET_13": 0.0, "RET_14": 0.0, "RET_15": 0.0, "RET_16": 0.0,
+  "RET_17": 0.0, "RET_18": 0.0, "RET_19": 0.0, "RET_20": 0.0
+}
+```
+
+Example response:
+
+```json
+{
+  "model_name": "gradient_boosting_ret20_final",
+  "model_version": "2.0.0",
+  "positive_probability": 0.51,
+  "predicted_class": 1,
+  "threshold": 0.5
+}
+```
+
+The API also exposes `GET /health` and `GET /model-info`.
+
+## Reproducibility
+
+The repository tracks frozen TOML configurations, seed 42, the grouped-fold
+manifest, canonical hashes, OOF reports, an immutable lockbox incident report,
+the small final model, and its manifest. Submission files remain local and are
+validated against the official schema, reopened after writing, and hashed.
+Tests cover data contracts, grouping invariants, pipeline parameters,
+serialization, API behavior, and platform-safe text hashing.
+
+## Limitations
+
+- Predictive signal is weak and close to 0.5.
+- Data and group labels are anonymized; no reliable chronology is inferred.
+- Local validation and leaderboard behavior can differ.
+- The model is educational and does not represent financial advice.
+- No return, risk, or profitability guarantee is made.
+
+## Project status
+
+The portfolio version is closed. Advanced feature engineering, alternative
+boosting engines, hyperparameter optimization, deep learning, and renewed
+leaderboard competition are outside scope. Historical research remains for
+traceability but is not the production pipeline.

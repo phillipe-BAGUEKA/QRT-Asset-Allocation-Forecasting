@@ -226,8 +226,16 @@ class QRTModelService:
             "training_observations": self.metadata.get(
                 "training_row_count"
             ),
-            "training_dates": self.metadata.get("training_date_count"),
-            "reference_metrics": self.metadata.get("validation_reference"),
+            "training_groups": self.metadata.get("training_group_count"),
+            "training_scope": self.metadata.get("training_scope"),
+            "trained_at": self.metadata.get("generated_at_utc"),
+            "development_oof_metrics": self.metadata.get(
+                "development_oof_metrics"
+            ),
+            "lockbox_metrics": self.metadata.get("lockbox_metrics"),
+            "configuration_sha256": self.metadata.get(
+                "configuration_sha256"
+            ),
             "software_versions": software_versions or None,
             "model_sha256": self.metadata.get("artifact_sha256"),
         }

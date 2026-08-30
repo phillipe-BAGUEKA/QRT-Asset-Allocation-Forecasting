@@ -124,3 +124,16 @@ def test_load_rejects_missing_model_without_calling_joblib(
         )
 
     load_mock.assert_not_called()
+
+
+def test_versioned_final_artifact_loads_and_predicts() -> None:
+    service = QRTModelService.load()
+
+    result = service.predict(
+        {feature: 0.0 for feature in EXPECTED_FEATURE_COLUMNS}
+    )
+
+    assert service.model_name == "gradient_boosting_ret20_final"
+    assert service.model_version == "2.0.0"
+    assert result["predicted_class"] in {0, 1}
+    assert 0.0 <= result["positive_probability"] <= 1.0

@@ -73,7 +73,7 @@ def create_app(
         description=(
             "Inference API for the QRT asset allocation forecasting project."
         ),
-        version="0.2.0",
+        version="1.0.0",
         lifespan=lifespan,
     )
 
@@ -100,9 +100,20 @@ def create_app(
         }
 
     @application.get("/health")
-    def read_health() -> dict[str, str]:
-        """Report that the API process is running and responsive."""
-        return {"status": "healthy"}
+    def read_health(request: Request) -> dict[str, Any]:
+        """Report process, model and schema readiness."""
+        service = getattr(request.app.state, "model_service", None)
+        if service is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="The prediction model is unavailable.",
+            )
+        return {
+            "status": "healthy",
+            "model_loaded": True,
+            "schema_available": len(service.feature_columns) == 20,
+            "model_version": service.model_version,
+        }
 
     @application.get("/model-info")
     def read_model_info(

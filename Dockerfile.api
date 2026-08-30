@@ -1,0 +1,18 @@
+FROM python:3.13-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /workspace
+COPY pyproject.toml README.md ./
+COPY src ./src
+RUN python -m pip install --no-cache-dir '.[app]'
+
+COPY app ./app
+COPY models/gradient_boosting_ret20_final.joblib ./models/gradient_boosting_ret20_final.joblib
+COPY models/gradient_boosting_ret20_final.manifest.json ./models/gradient_boosting_ret20_final.manifest.json
+
+RUN useradd --create-home appuser && chown -R appuser:appuser /workspace
+USER appuser
+EXPOSE 8000
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

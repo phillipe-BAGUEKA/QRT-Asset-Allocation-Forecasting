@@ -29,8 +29,8 @@ def test_predict_returns_probability_and_threshold_consistent_class(
     assert result["predicted_class"] == int(
         result["positive_probability"] >= result["threshold"]
     )
-    assert result["model_name"] == "gradient_boosting_ret20_v1"
-    assert result["model_version"] == "v1"
+    assert result["model_name"] == "gradient_boosting_ret20_final"
+    assert result["model_version"] == "2.0.0"
 
 
 def test_predict_builds_one_row_with_exact_feature_order(

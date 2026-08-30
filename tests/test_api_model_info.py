@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 from app.config import EXPECTED_FEATURE_COLUMNS
@@ -27,7 +28,7 @@ def test_model_info_returns_feature_order_and_valid_threshold(
     assert model_info["features"] == list(EXPECTED_FEATURE_COLUMNS)
     assert model_info["feature_count"] == 20
     assert 0.0 <= model_info["threshold"] <= 1.0
-    assert model_info["model_version"] == "v1"
+    assert model_info["model_version"] == "2.0.0"
 
 
 def test_model_info_returns_available_training_metadata(
@@ -35,12 +36,14 @@ def test_model_info_returns_available_training_metadata(
 ) -> None:
     model_info = api_test_client.get("/model-info").json()
 
-    assert model_info["training_period"] == {
-        "start": "DATE_0001",
-        "end": "DATE_2522",
-    }
     assert model_info["training_observations"] == 527073
-    assert model_info["reference_metrics"]["mean_valid_roc_auc"] == 0.52936
+    assert model_info["training_scope"] == "full_train"
+    assert model_info["development_oof_metrics"]["roc_auc"] == pytest.approx(
+        0.5263507714229808
+    )
+    assert model_info["lockbox_metrics"]["roc_auc"] == pytest.approx(
+        0.5279115269555654
+    )
 
 
 def test_model_info_returns_503_when_metadata_is_missing(

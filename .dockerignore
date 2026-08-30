@@ -1,0 +1,17 @@
+.git
+.github
+.venv
+.pytest_cache
+__pycache__
+*.pyc
+.env
+artifacts
+data
+legacy
+mlflow_data
+research
+tests
+*.ipynb
+models/*
+!models/gradient_boosting_ret20_final.joblib
+!models/gradient_boosting_ret20_final.manifest.json

@@ -49,6 +49,8 @@ models/*
 *.joblib
 *.pt
 *.pth
+!models/gradient_boosting_ret20_final.joblib
+!models/gradient_boosting_ret20_final.manifest.json
 
 # CatBoost local files
 catboost_info/

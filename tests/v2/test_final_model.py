@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from pathlib import Path
 
 import numpy as np
@@ -17,6 +19,7 @@ from qrt_forecasting.v2.final_model import (
     partition_final_training_data,
     validate_frozen_final_configuration,
 )
+from scripts.v2 import finalize_portfolio_model as finalizer
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
@@ -111,3 +114,47 @@ def test_partition_rejects_cross_role_group() -> None:
     training.loc[2, 'TS'] = 'A'
     with pytest.raises(ValueError, match='overlap'):
         partition_final_training_data(training, assignment)
+
+
+def test_csv_contract_keeps_comma_training_and_semicolon_test(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    row = {'ROW_ID': 100, **{column: float(index) for index, column in enumerate(FINAL_FEATURE_COLUMNS)}}
+    pd.DataFrame([row]).to_csv(tmp_path / 'X_train.csv', index=False, sep=',')
+    pd.DataFrame([row]).to_csv(tmp_path / 'X_test.csv', index=False, sep=';')
+    pd.DataFrame({'ROW_ID': [100], 'prediction': [0]}).to_csv(
+        tmp_path / 'sample_submission.csv', index=False, sep=','
+    )
+    monkeypatch.setattr(finalizer, 'RAW_DATA_DIRECTORY', tmp_path)
+
+    training = finalizer._read_csv(
+        tmp_path / 'X_train.csv',
+        separator=finalizer.TRAINING_CSV_SEPARATOR,
+    )
+    test_features, sample = finalizer._load_test_inputs()
+
+    assert training.columns.tolist() == ['ROW_ID', *FINAL_FEATURE_COLUMNS]
+    assert test_features.columns.tolist() == ['ROW_ID', *FINAL_FEATURE_COLUMNS]
+    assert test_features['ROW_ID'].equals(sample['ROW_ID'])
+
+
+def test_final_manifests_record_model_hash_and_lockbox_incident() -> None:
+    model_path = REPOSITORY_ROOT / 'models' / 'gradient_boosting_ret20_final.joblib'
+    manifest_path = REPOSITORY_ROOT / 'models' / 'gradient_boosting_ret20_final.manifest.json'
+    lockbox_path = REPOSITORY_ROOT / 'reports' / 'final' / 'gradient_boosting_ret20_final.lockbox.json'
+    report_path = REPOSITORY_ROOT / 'reports' / 'final' / 'gradient_boosting_ret20_final.json'
+    manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+    lockbox = json.loads(lockbox_path.read_text(encoding='utf-8'))
+    report = json.loads(report_path.read_text(encoding='utf-8'))
+
+    assert hashlib.sha256(model_path.read_bytes()).hexdigest() == manifest['artifact_sha256']
+    assert hashlib.sha256(lockbox_path.read_bytes()).hexdigest() == report['lockbox_report_sha256']
+    assert lockbox['lockbox_computation_attempts'] == 2
+    assert lockbox['lockbox_recorded_evaluations'] == 1
+    assert lockbox['first_attempt_metrics_observed'] is False
+    assert lockbox['lockbox_used_for_additional_model_selection'] is False
+    assert lockbox['model_changed_between_attempts'] is False
+    assert lockbox['features_changed_between_attempts'] is False
+    assert lockbox['hyperparameters_changed_between_attempts'] is False
+    assert lockbox['threshold_changed_between_attempts'] is False

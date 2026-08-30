@@ -21,10 +21,11 @@ def valid_metadata() -> dict[str, Any]:
         "feature_count": len(EXPECTED_FEATURE_COLUMNS),
         "joblib_version": "1.5.3",
         "model_family": "GradientBoostingClassifier",
-        "model_name": "gradient_boosting_ret20_v1",
+        "model_name": "gradient_boosting_ret20_final",
+        "model_version": "2.0.0",
         "numpy_version": "2.4.4",
         "pandas_version": "2.3.3",
-        "pipeline": ["SimpleImputer", "GradientBoostingClassifier"],
+        "pipeline": ["OrderedColumnSelector", "SimpleImputer", "GradientBoostingClassifier"],
         "prediction_threshold": 0.5,
         "python_version": "3.13.7",
         "scikit_learn_version": "1.8.0",
@@ -32,7 +33,10 @@ def valid_metadata() -> dict[str, Any]:
         "training_end_date": "DATE_2522",
         "training_row_count": 527073,
         "training_start_date": "DATE_0001",
-        "validation_reference": {"mean_valid_roc_auc": 0.52936},
+        "training_scope": "full_train",
+        "generated_at_utc": "2026-08-30T10:00:00+00:00",
+        "development_oof_metrics": {"roc_auc": 0.5263507714229808},
+        "lockbox_metrics": {"roc_auc": 0.5279115269555654},
     }
 
 

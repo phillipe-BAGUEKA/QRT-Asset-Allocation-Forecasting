@@ -1,7 +1,7 @@
 [project]
 name = 'qrt-forecasting'
 version = '2.0.0.dev0'
-description = 'Leakage-safe grouped validation for the QRT asset allocation challenge'
+description = 'End-to-end machine learning project for predicting next-day asset-allocation return direction.'
 readme = 'README.md'
 requires-python = '>=3.11,<3.14'
 dependencies = [
