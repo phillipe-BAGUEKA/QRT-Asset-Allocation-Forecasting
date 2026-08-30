@@ -1,0 +1,35 @@
+model_name = 'gradient_boosting_ret20_final'
+model_version = '2.0.0'
+source_experiment_id = 'GB_RET20_REFERENCE'
+source_configuration_sha256 = '3ef7899676d8a51ee0372b7dc592312f20fba2acfa42906eec9feea8729809df'
+feature_columns = [
+    'RET_1', 'RET_2', 'RET_3', 'RET_4', 'RET_5',
+    'RET_6', 'RET_7', 'RET_8', 'RET_9', 'RET_10',
+    'RET_11', 'RET_12', 'RET_13', 'RET_14', 'RET_15',
+    'RET_16', 'RET_17', 'RET_18', 'RET_19', 'RET_20',
+]
+threshold = 0.5
+random_state = 42
+training_scope = 'full_train'
+
+[preprocessing]
+strategy = 'constant'
+fill_value = 0.0
+
+[model]
+learning_rate = 0.05
+n_estimators = 50
+max_depth = 2
+min_samples_leaf = 20
+subsample = 0.7
+max_features = 'sqrt'
+
+[validation]
+protocol = 'group_aware_stratified_cv'
+n_splits = 5
+group_column = 'TS'
+development_rows = 421654
+lockbox_rows = 105419
+assignment_sha256 = '4c4eaa6133ea4d150b0cfc0efceba9d8686bcb099141f8444b9217f2a211cde7'
+development_identifiers_sha256 = '5831a7feebea1b4cbed2df2cfdaac72f2e17cff1cc017349f2b713b06c694a9e'
+lockbox_identifiers_sha256 = 'eaed8a4631941bb756160ee645bbc89f0211cf9d17436893b3b956d95f8637fd'

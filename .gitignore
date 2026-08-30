@@ -41,8 +41,10 @@ data/submissions/*.csv
 data/submissions/*.json
 data/submissions/*probabilities*
 
-# Model artifacts
-models/
+# Model artifacts (only the small final portfolio artifact is versioned)
+models/*
+!models/gradient_boosting_ret20_final.joblib
+!models/gradient_boosting_ret20_final.manifest.json
 *.pkl
 *.joblib
 *.pt

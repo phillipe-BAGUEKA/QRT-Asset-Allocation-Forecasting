@@ -16,9 +16,8 @@ as the `qrt_forecasting` package and are not collected by the active test suite.
 Exact historical reconstruction should start from the commit above. No legacy
 Git tag was created during this refactor.
 
-The FastAPI and Streamlit application remain active outside this archive and
-continue to serve the locally generated V1 model until a separately reviewed
-V2 promotion is authorized.
+The active FastAPI and Streamlit application lives outside this directory and
+does not import or serve any file from `legacy/v1`.
 
 The existing notebook 09 stash is deliberately not represented here. The
 archive contains only the version tracked by Git at the reference commit.

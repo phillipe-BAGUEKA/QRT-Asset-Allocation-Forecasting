@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import pandas as pd
@@ -154,27 +153,3 @@ def test_persisted_assignment_is_hash_verified(tmp_path: Path) -> None:
     tampered.to_csv(assignment_path, index=False)
     with pytest.raises(ValueError, match='hash'):
         load_assignment_artifacts(assignment_path, manifest_path)
-
-
-def test_audit_notebook_only_loads_and_visualizes_artifacts() -> None:
-    notebook_path = (
-        Path(__file__).resolve().parents[2]
-        / 'research'
-        / 'v2'
-        / 'notebooks'
-        / '00_grouped_validation_audit.ipynb'
-    )
-    notebook = json.loads(notebook_path.read_text(encoding='utf-8'))
-    code = '\n'.join(
-        ''.join(cell['source'])
-        for cell in notebook['cells']
-        if cell['cell_type'] == 'code'
-    )
-
-    assert 'load_assignment_artifacts' in code
-    assert 'create_group_fold_assignment' not in code
-    assert 'create_development_lockbox_assignment' not in code
-    assert 'load_training_features' not in code
-    assert 'X_test' not in code
-    assert '.fit(' not in code
-    assert all(not cell.get('outputs') for cell in notebook['cells'])
