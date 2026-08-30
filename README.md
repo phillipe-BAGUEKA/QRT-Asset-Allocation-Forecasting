@@ -201,12 +201,7 @@ serialization, API behavior, and platform-safe text hashing.
 - Predictive signal is weak and close to 0.5.
 - Data and group labels are anonymized; no reliable chronology is inferred.
 - Local validation and leaderboard behavior can differ.
-- The model is educational and does not represent financial advice.
-- No return, risk, or profitability guarantee is made.
 
 ## Project status
 
-The portfolio version is closed. Advanced feature engineering, alternative
-boosting engines, hyperparameter optimization, deep learning, and renewed
-leaderboard competition are outside scope. Historical research remains for
-traceability but is not the production pipeline.
+The research and model-selection phase is complete. The final pipeline uses a frozen Gradient Boosting classifier trained on `RET_1` through `RET_20`, evaluated with group-aware validation, retrained on the full labeled dataset, and served through FastAPI and Streamlit. Historical experiments are preserved for traceability but are not part of the active inference pipeline.
