@@ -7,6 +7,7 @@ WORKDIR /workspace
 COPY pyproject.toml README.md ./
 COPY src ./src
 RUN python -m pip install --no-cache-dir '.[app]'
+ENV PYTHONPATH=/workspace
 
 COPY app ./app
 COPY frontend ./frontend
